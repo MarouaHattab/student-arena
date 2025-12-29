@@ -28,6 +28,14 @@ const register = async (req, res) => {
       return res.status(400).json({ message: 'Ce nom d\'utilisateur est déjà pris' });
     }
 
+    // Déterminer le rôle de l'utilisateur
+    // Premier utilisateur devient admin automatiquement
+    let role = 'user';
+    const userCount = await User.countDocuments();
+    if (userCount === 0) {
+      role = 'admin';
+    }
+
     // Hasher le mot de passe
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -38,6 +46,7 @@ const register = async (req, res) => {
       email,
       password: hashedPassword,
       userName,
+      role,
       createdAt: new Date(),
       updatedAt: new Date()
     });
