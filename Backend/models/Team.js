@@ -4,10 +4,12 @@ const teamSchema = new mongoose.Schema({
   name: String,
   description: String,
   slogan: String,
-  leader: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  },
+  leaders: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }
+  ],
   members: [
     {
       type: mongoose.Schema.Types.ObjectId,
