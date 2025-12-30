@@ -139,7 +139,28 @@ const getSubmissionById = async (req, res) => {
       return res.status(404).json({ message: 'Soumission non trouvée' });
     }
 
-    res.json(submission);
+    // Admin peut tout voir
+    if (req.user.role === 'admin') {
+      return res.json(submission);
+    }
+
+    // Vérifier si c'est une soumission individuelle de l'utilisateur
+    if (submission.submittedByUser && 
+        submission.submittedByUser._id.toString() === req.user._id.toString()) {
+      return res.json(submission);
+    }
+
+    // Vérifier si c'est une soumission d'équipe et l'utilisateur est membre
+    if (submission.submittedByTeam) {
+      const isMember = submission.submittedByTeam.members.some(
+        m => m.toString() === req.user._id.toString()
+      );
+      if (isMember) {
+        return res.json(submission);
+      }
+    }
+
+    return res.status(403).json({ message: 'Non autorisé à voir cette soumission' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Erreur serveur', error: error.message });
@@ -312,6 +333,38 @@ const getMySubmissions = async (req, res) => {
   }
 };
 
+// @desc    Récupérer les soumissions d'une équipe
+// @route   GET /api/submissions/team/:teamId
+// @access  Private (membre de l'équipe ou admin)
+const getTeamSubmissions = async (req, res) => {
+  try {
+    const { teamId } = req.params;
+
+    // Trouver l'équipe
+    const team = await Team.findById(teamId);
+    if (!team) {
+      return res.status(404).json({ message: 'Équipe non trouvée' });
+    }
+
+    // Vérifier si l'utilisateur est membre de l'équipe ou admin
+    const isMember = team.members.some(m => m.toString() === req.user._id.toString());
+    
+    if (!isMember && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Non autorisé à voir les soumissions de cette équipe' });
+    }
+
+    const submissions = await Submission.find({ submittedByTeam: teamId })
+      .populate('project', 'title status type')
+      .populate('reviewedBy', 'firstName lastName')
+      .sort({ submittedAt: -1 });
+
+    res.json(submissions);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erreur serveur', error: error.message });
+  }
+};
+
 module.exports = {
   createSubmission,
   getSubmissions,
@@ -320,5 +373,6 @@ module.exports = {
   deleteSubmission,
   reviewSubmission,
   rankSubmission,
-  getMySubmissions
+  getMySubmissions,
+  getTeamSubmissions
 };

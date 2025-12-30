@@ -11,6 +11,7 @@ const projectRoutes = require('./routes/projectRoutes');
 const submissionRoutes = require('./routes/submissionRoutes');
 const leaderboardRoutes = require('./routes/leaderboardRoutes');
 const teamInvitationRoutes = require('./routes/teamInvitationRoutes');
+const aiRoutes = require('./routes/aiRoutes');
 
 // Connexion à la base de données
 connectDB();
@@ -18,11 +19,13 @@ connectDB();
 const app = express();
 const port = process.env.PORT || 5000;
 
-// Middleware
+// CORS Configuration
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
-  credentials: true
+    origin: 'http://localhost:5173', 
+    credentials: true 
 }));
+
+// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -34,6 +37,7 @@ app.use('/api/projects', projectRoutes);
 app.use('/api/submissions', submissionRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/api/invitations', teamInvitationRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Route de test
 app.get('/', (req, res) => {
@@ -49,20 +53,6 @@ app.get('/', (req, res) => {
       leaderboard: '/api/leaderboard',
       invitations: '/api/invitations'
     }
-  });
-});
-
-// Middleware de gestion des erreurs 404
-app.use((req, res, next) => {
-  res.status(404).json({ message: 'Route non trouvée' });
-});
-
-// Middleware de gestion des erreurs globales
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ 
-    message: 'Erreur serveur',
-    error: process.env.NODE_ENV === 'development' ? err.message : undefined
   });
 });
 

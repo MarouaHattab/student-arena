@@ -1,7 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const { body } = require('express-validator');
-const { validate } = require('../middleware/validateMiddleware');
 const {
   createTeam,
   getTeams,
@@ -16,74 +14,25 @@ const {
   removeLeadership
 } = require('../controllers/teamController');
 const { protect, admin, teamLeader } = require('../middleware/authMiddleware');
-
-// Validation rules
-const createTeamValidation = [
-  body('name')
-    .trim()
-    .notEmpty().withMessage('Le nom de l\'équipe est requis')
-    .isLength({ min: 2, max: 100 }).withMessage('Le nom doit contenir entre 2 et 100 caractères'),
-  body('description')
-    .optional()
-    .trim()
-    .isLength({ max: 500 }).withMessage('La description ne peut pas dépasser 500 caractères'),
-  body('slogan')
-    .optional()
-    .trim()
-    .isLength({ max: 200 }).withMessage('Le slogan ne peut pas dépasser 200 caractères'),
-  body('maxMembers')
-    .optional()
-    .isInt({ min: 2, max: 5 }).withMessage('Le nombre maximum de membres doit être entre 2 et 5')
-];
-
-const updateTeamValidation = [
-  body('name')
-    .optional()
-    .trim()
-    .isLength({ min: 2, max: 100 }).withMessage('Le nom doit contenir entre 2 et 100 caractères'),
-  body('description')
-    .optional()
-    .trim()
-    .isLength({ max: 500 }).withMessage('La description ne peut pas dépasser 500 caractères'),
-  body('slogan')
-    .optional()
-    .trim()
-    .isLength({ max: 200 }).withMessage('Le slogan ne peut pas dépasser 200 caractères'),
-  body('status')
-    .optional()
-    .isIn(['active', 'inactive', 'archived']).withMessage('Statut invalide')
-];
-
-const inviteMemberValidation = [
-  body('emailOrUsername')
-    .trim()
-    .notEmpty().withMessage('L\'email ou le username est requis')
-];
-
-const joinByCodeValidation = [
-  body('invitationCode')
-    .trim()
-    .notEmpty().withMessage('Le code d\'invitation est requis')
-    .isLength({ min: 8, max: 8 }).withMessage('Le code d\'invitation doit contenir 8 caractères')
-];
+const { validateCreateTeam, validateUpdateTeam, validateMongoId } = require('../middleware/validationMiddleware');
 
 // Routes publiques
 router.get('/', getTeams);
-router.get('/:id', getTeamById);
+router.get('/:id', validateMongoId, getTeamById);
 
 // Routes protégées
-router.post('/', protect, createTeamValidation, validate, createTeam);
-router.put('/:id', protect, teamLeader, updateTeamValidation, validate, updateTeam);
-router.delete('/:id', protect, teamLeader, deleteTeam);
+router.post('/', protect, validateCreateTeam, createTeam);
+router.put('/:id', protect, teamLeader, validateMongoId, validateUpdateTeam, updateTeam);
+router.delete('/:id', protect, teamLeader, validateMongoId, deleteTeam);
 
 // Gestion des membres
-router.post('/:id/invite', protect, teamLeader, inviteMemberValidation, validate, inviteMember);
-router.post('/join', protect, joinByCodeValidation, validate, joinTeamByCode);
-router.post('/:id/leave', protect, leaveTeam);
-router.delete('/:id/members/:memberId', protect, teamLeader, removeMember);
+router.post('/:id/invite', protect, teamLeader, validateMongoId, inviteMember);
+router.post('/join', protect, joinTeamByCode);
+router.post('/:id/leave', protect, validateMongoId, leaveTeam);
+router.delete('/:id/members/:memberId', protect, teamLeader, validateMongoId, removeMember);
 
 // Gestion du leadership
-router.post('/:id/give-leadership/:userId', protect, teamLeader, giveLeadership);
-router.delete('/:id/remove-leadership/:userId', protect, teamLeader, removeLeadership);
+router.post('/:id/give-leadership/:userId', protect, teamLeader, validateMongoId, giveLeadership);
+router.delete('/:id/remove-leadership/:userId', protect, teamLeader, validateMongoId, removeLeadership);
 
 module.exports = router;
