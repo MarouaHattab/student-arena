@@ -9,9 +9,7 @@ const {
   generateUserBio,
   // Recommandations
   recommendProjects,
-  // Analyse
-  analyzeSubmission,
-  analyzeSentiment,
+
   // Chatbot
   chatAssistant,
   // Résumés

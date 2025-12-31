@@ -6,7 +6,7 @@ const {
   getTeamById,
   updateTeam,
   deleteTeam,
-  inviteMember,
+  addMember,
   joinTeamByCode,
   leaveTeam,
   removeMember,
@@ -26,7 +26,7 @@ router.put('/:id', protect, teamLeader, validateMongoId, validateUpdateTeam, upd
 router.delete('/:id', protect, teamLeader, validateMongoId, deleteTeam);
 
 // Gestion des membres
-router.post('/:id/invite', protect, teamLeader, validateMongoId, inviteMember);
+router.post('/:id/add-member', protect, teamLeader, validateMongoId, addMember);
 router.post('/join', protect, joinTeamByCode);
 router.post('/:id/leave', protect, validateMongoId, leaveTeam);
 router.delete('/:id/members/:memberId', protect, teamLeader, validateMongoId, removeMember);

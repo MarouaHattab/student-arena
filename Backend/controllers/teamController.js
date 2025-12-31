@@ -151,12 +151,12 @@ const deleteTeam = async (req, res) => {
   }
 };
 
-// @desc    Inviter un membre à l'équipe (par email ou username)
-// @route   POST /api/teams/:id/invite
+// @desc    Ajouter un membre à l'équipe (par email ou username)
+// @route   POST /api/teams/:id/add-member
 // @access  Private/TeamLeader
-const inviteMember = async (req, res) => {
+const addMember = async (req, res) => {
   try {
-    const { emailOrUsername, message } = req.body;
+    const { emailOrUsername } = req.body;
 
     const team = await Team.findById(req.params.id);
     if (!team) {
@@ -166,53 +166,54 @@ const inviteMember = async (req, res) => {
     // Vérifier si l'utilisateur est un leader
     const isLeader = team.leaders.some(l => l.toString() === req.user._id.toString());
     if (!isLeader) {
-      return res.status(403).json({ message: 'Seul un leader peut inviter des membres' });
+      return res.status(403).json({ message: 'Seul un leader peut ajouter des membres' });
     }
 
     // Vérifier si l'équipe est complète
     if (team.members.length >= team.maxMembers) {
-      return res.status(400).json({ message: 'L\'équipe est complète' });
+      return res.status(400).json({ message: `L'équipe est complète (maximum ${team.maxMembers} membres)` });
     }
 
     // Trouver l'utilisateur par email OU username
-    const userToInvite = await User.findOne({
+    const userToAdd = await User.findOne({
       $or: [
         { email: emailOrUsername },
         { userName: emailOrUsername }
       ]
     });
 
-    if (!userToInvite) {
+    if (!userToAdd) {
       return res.status(404).json({ message: 'Utilisateur non trouvé avec cet email ou username' });
     }
 
     // Vérifier si l'utilisateur a déjà une équipe
-    if (userToInvite.team) {
+    if (userToAdd.team) {
       return res.status(400).json({ message: 'Cet utilisateur appartient déjà à une équipe' });
     }
 
-    // Vérifier si une invitation est déjà en attente
-    const existingInvitation = await TeamInvitation.findOne({
-      team: team._id,
-      invitedUser: userToInvite._id,
-      status: 'pending'
-    });
-
-    if (existingInvitation) {
-      return res.status(400).json({ message: 'Une invitation est déjà en attente pour cet utilisateur' });
+    // Vérifier si l'utilisateur est déjà membre
+    if (team.members.some(m => m.toString() === userToAdd._id.toString())) {
+      return res.status(400).json({ message: 'Cet utilisateur est déjà membre de l\'équipe' });
     }
 
-    // Créer l'invitation
-    const invitation = await TeamInvitation.create({
-      team: team._id,
-      invitedUser: userToInvite._id,
-      invitedBy: req.user._id,
-      message,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      createdAt: new Date()
-    });
+    // Ajouter directement l'utilisateur à l'équipe
+    team.members.push(userToAdd._id);
+    team.updatedAt = new Date();
+    await team.save();
 
-    res.status(201).json({ message: 'Invitation envoyée', invitation });
+    // Mettre à jour l'utilisateur
+    await User.findByIdAndUpdate(userToAdd._id, { team: team._id });
+
+    res.status(201).json({ 
+      message: `${userToAdd.firstName} ${userToAdd.lastName} a été ajouté à l'équipe`,
+      team,
+      addedMember: {
+        _id: userToAdd._id,
+        firstName: userToAdd.firstName,
+        lastName: userToAdd.lastName,
+        userName: userToAdd.userName
+      }
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Erreur serveur', error: error.message });
@@ -451,7 +452,7 @@ module.exports = {
   getTeamById,
   updateTeam,
   deleteTeam,
-  inviteMember,
+  addMember,
   joinTeamByCode,
   leaveTeam,
   removeMember,

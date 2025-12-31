@@ -10,7 +10,6 @@ const teamRoutes = require('./routes/teamRoutes');
 const projectRoutes = require('./routes/projectRoutes');
 const submissionRoutes = require('./routes/submissionRoutes');
 const leaderboardRoutes = require('./routes/leaderboardRoutes');
-const teamInvitationRoutes = require('./routes/teamInvitationRoutes');
 const aiRoutes = require('./routes/aiRoutes');
 
 // Connexion à la base de données
@@ -36,7 +35,6 @@ app.use('/api/teams', teamRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/submissions', submissionRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
-app.use('/api/invitations', teamInvitationRoutes);
 app.use('/api/ai', aiRoutes);
 
 // Route de test
@@ -50,8 +48,7 @@ app.get('/', (req, res) => {
       teams: '/api/teams',
       projects: '/api/projects',
       submissions: '/api/submissions',
-      leaderboard: '/api/leaderboard',
-      invitations: '/api/invitations'
+      leaderboard: '/api/leaderboard'
     }
   });
 });

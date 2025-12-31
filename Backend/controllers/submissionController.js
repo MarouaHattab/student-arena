@@ -258,7 +258,12 @@ const rankSubmission = async (req, res) => {
     const { ranking } = req.body;
 
     const submission = await Submission.findById(req.params.id)
-      .populate('project');
+      .populate('project')
+      .populate('submittedByUser')
+      .populate({
+        path: 'submittedByTeam',
+        populate: { path: 'members' }
+      });
     
     if (!submission) {
       return res.status(404).json({ message: 'Soumission non trouvée' });
@@ -271,6 +276,7 @@ const rankSubmission = async (req, res) => {
     const project = submission.project;
     let pointsAwarded = project.otherParticipantsPoints;
 
+    // Déterminer les points selon le classement (1er, 2ème, 3ème)
     if (ranking === 1) {
       pointsAwarded = project.firstPlacePoints;
     } else if (ranking === 2) {
@@ -279,25 +285,87 @@ const rankSubmission = async (req, res) => {
       pointsAwarded = project.thirdPlacePoints;
     }
 
-    // Mettre à jour les points de l'utilisateur ou de l'équipe
+    let pointsDistribution = {
+      mainRecipient: { type: '', name: '', points: 0 },
+      bonus: []
+    };
+
+    // PROJET INDIVIDUEL
     if (submission.submittedByUser) {
-      await User.findByIdAndUpdate(submission.submittedByUser, {
+      const user = submission.submittedByUser;
+      
+      // Ajouter 100% des points à l'utilisateur
+      await User.findByIdAndUpdate(user._id, {
         $inc: { points: pointsAwarded }
       });
-    } else if (submission.submittedByTeam) {
-      await Team.findByIdAndUpdate(submission.submittedByTeam, {
+
+      pointsDistribution.mainRecipient = {
+        type: 'user',
+        name: `${user.firstName} ${user.lastName}`,
+        points: pointsAwarded
+      };
+
+      // Si l'utilisateur fait partie d'une équipe, ajouter 50% des points à l'équipe
+      if (user.team) {
+        const teamBonus = Math.round(pointsAwarded * 0.5);
+        await Team.findByIdAndUpdate(user.team, {
+          $inc: { points: teamBonus }
+        });
+
+        const team = await Team.findById(user.team);
+        pointsDistribution.bonus.push({
+          type: 'team',
+          name: team.name,
+          points: teamBonus,
+          reason: '50% bonus pour l\'équipe (projet individuel)'
+        });
+      }
+    } 
+    // PROJET D'ÉQUIPE
+    else if (submission.submittedByTeam) {
+      const team = submission.submittedByTeam;
+      
+      // Ajouter 100% des points à l'équipe
+      await Team.findByIdAndUpdate(team._id, {
         $inc: { points: pointsAwarded }
       });
+
+      pointsDistribution.mainRecipient = {
+        type: 'team',
+        name: team.name,
+        points: pointsAwarded
+      };
+
+      // Ajouter 50% des points à chaque membre de l'équipe
+      const memberBonus = Math.round(pointsAwarded * 0.5);
+      
+      for (const member of team.members) {
+        await User.findByIdAndUpdate(member._id, {
+          $inc: { points: memberBonus }
+        });
+
+        pointsDistribution.bonus.push({
+          type: 'user',
+          name: `${member.firstName} ${member.lastName}`,
+          points: memberBonus,
+          reason: '50% bonus pour chaque membre (projet d\'équipe)'
+        });
+      }
     }
 
-    // Mettre à jour la soumission - utiliser project._id car project est maintenant peuplé
+    // Mettre à jour la soumission
     await Submission.findByIdAndUpdate(req.params.id, {
       ranking,
       pointsAwarded,
       updatedAt: new Date()
     });
 
-    res.json({ message: 'Classement attribué avec succès', ranking, pointsAwarded });
+    res.json({ 
+      message: 'Classement attribué avec succès', 
+      ranking, 
+      pointsAwarded,
+      distribution: pointsDistribution
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Erreur serveur', error: error.message });
@@ -365,6 +433,76 @@ const getTeamSubmissions = async (req, res) => {
   }
 };
 
+// @desc    Ajouter des points à un utilisateur ou une équipe
+// @route   POST /api/submissions/add-points
+// @access  Private/Admin
+const addPoints = async (req, res) => {
+  try {
+    const { userId, teamId, points, reason } = req.body;
+
+    // Validation
+    if (!points || points <= 0) {
+      return res.status(400).json({ message: 'Le nombre de points doit être supérieur à 0' });
+    }
+
+    if (!userId && !teamId) {
+      return res.status(400).json({ message: 'Vous devez spécifier un utilisateur ou une équipe' });
+    }
+
+    if (userId && teamId) {
+      return res.status(400).json({ message: 'Vous ne pouvez spécifier qu\'un utilisateur OU une équipe, pas les deux' });
+    }
+
+    let result;
+
+    if (userId) {
+      // Ajouter des points à un utilisateur
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'Utilisateur non trouvé' });
+      }
+
+      user.points = (user.points || 0) + points;
+      await user.save();
+
+      result = {
+        type: 'user',
+        target: `${user.firstName} ${user.lastName}`,
+        previousPoints: (user.points - points),
+        newPoints: user.points,
+        pointsAdded: points,
+        reason: reason || 'Attribution manuelle par admin'
+      };
+    } else {
+      // Ajouter des points à une équipe
+      const team = await Team.findById(teamId);
+      if (!team) {
+        return res.status(404).json({ message: 'Équipe non trouvée' });
+      }
+
+      team.points = (team.points || 0) + points;
+      await team.save();
+
+      result = {
+        type: 'team',
+        target: team.name,
+        previousPoints: (team.points - points),
+        newPoints: team.points,
+        pointsAdded: points,
+        reason: reason || 'Attribution manuelle par admin'
+      };
+    }
+
+    res.json({ 
+      message: 'Points ajoutés avec succès',
+      result
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erreur serveur', error: error.message });
+  }
+};
+
 module.exports = {
   createSubmission,
   getSubmissions,
@@ -374,5 +512,6 @@ module.exports = {
   reviewSubmission,
   rankSubmission,
   getMySubmissions,
-  getTeamSubmissions
+  getTeamSubmissions,
+  addPoints
 };

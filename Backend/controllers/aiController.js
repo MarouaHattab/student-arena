@@ -271,106 +271,6 @@ Recommandations:`;
   }
 };
 
-// ==================== FEEDBACK & ANALYSE AI ====================
-
-// @desc    Analyser et donner un feedback sur une soumission
-// @route   POST /api/ai/analyze-submission
-// @access  Private
-const analyzeSubmission = async (req, res) => {
-  try {
-    const { submissionContent, projectDescription, repositoryUrl } = req.body;
-
-    if (!submissionContent && !repositoryUrl) {
-      return res.status(400).json({ message: 'Le contenu ou l\'URL du repository est requis' });
-    }
-
-    const model = getModel();
-    const prompt = `Tu es un expert en évaluation de projets techniques.
-
-Description du projet/défi:
-${projectDescription || 'Non spécifiée'}
-
-Soumission à analyser:
-${submissionContent || `Repository: ${repositoryUrl}`}
-
-Analyse cette soumission et fournis:
-1. Points forts (3-5 points)
-2. Points à améliorer (3-5 points)
-3. Suggestions concrètes d'amélioration
-4. Score estimé sur 100
-
-Réponds en JSON avec ce format:
-{
-  "strengths": ["..."],
-  "improvements": ["..."],
-  "suggestions": ["..."],
-  "estimatedScore": 75,
-  "summary": "Résumé en 2-3 phrases"
-}`;
-
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
-
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      const analysis = JSON.parse(jsonMatch[0]);
-      return res.json({ 
-        success: true,
-        analysis 
-      });
-    }
-
-    res.status(500).json({ message: 'Erreur lors de l\'analyse' });
-  } catch (error) {
-    console.error('Erreur analyzeSubmission:', error);
-    res.status(500).json({ message: 'Erreur serveur', error: error.message });
-  }
-};
-
-// @desc    Analyser le sentiment d'un texte (feedback, commentaires)
-// @route   POST /api/ai/analyze-sentiment
-// @access  Private
-const analyzeSentiment = async (req, res) => {
-  try {
-    const { text } = req.body;
-
-    if (!text) {
-      return res.status(400).json({ message: 'Le texte est requis' });
-    }
-
-    const model = getModel();
-    const prompt = `Analyse le sentiment de ce texte et réponds UNIQUEMENT en JSON.
-
-Texte: "${text}"
-
-Format de réponse:
-{
-  "sentiment": "positive" | "negative" | "neutral" | "mixed",
-  "confidence": 0.0 à 1.0,
-  "emotions": ["joie", "frustration", etc.],
-  "summary": "Résumé court du ton"
-}`;
-
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const responseText = response.text();
-
-    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      const sentimentAnalysis = JSON.parse(jsonMatch[0]);
-      return res.json({ 
-        success: true,
-        analysis: sentimentAnalysis 
-      });
-    }
-
-    res.status(500).json({ message: 'Erreur lors de l\'analyse' });
-  } catch (error) {
-    console.error('Erreur analyzeSentiment:', error);
-    res.status(500).json({ message: 'Erreur serveur', error: error.message });
-  }
-};
 
 // ==================== CHATBOT AI ====================
 
@@ -672,9 +572,6 @@ module.exports = {
   generateUserBio,
   // Recommandations
   recommendProjects,
-  // Analyse
-  analyzeSubmission,
-  analyzeSentiment,
   // Chatbot
   chatAssistant,
   // Résumés
