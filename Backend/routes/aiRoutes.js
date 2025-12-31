@@ -39,13 +39,6 @@ router.post('/generate-bio', protect, generateUserBio);
 // Obtenir des recommandations de projets personnalisées
 router.get('/recommend-projects', protect, recommendProjects);
 
-// ==================== ROUTES ANALYSE ====================
-// Analyser une soumission
-router.post('/analyze-submission', protect, analyzeSubmission);
-
-// Analyser le sentiment d'un texte
-router.post('/analyze-sentiment', protect, analyzeSentiment);
-
 // ==================== ROUTES CHATBOT ====================
 // Chatbot d'assistance
 router.post('/chat', protect, chatAssistant);
