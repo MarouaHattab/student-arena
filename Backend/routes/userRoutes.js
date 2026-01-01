@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {
+  getProfile,
   getUsers,
   getUserById,
   updateUser,
@@ -15,6 +16,9 @@ const { validateUpdateUser, validateChangePassword, validateMongoId } = require(
 // Routes publiques
 router.get('/leaderboard', getUsersLeaderboard);
 
+// Route profil utilisateur connecté
+router.get('/profile', protect, getProfile);
+
 // Routes protégées
 router.get('/', protect, admin, getUsers);
 router.get('/:id', protect, validateMongoId, getUserById);
@@ -24,3 +28,4 @@ router.delete('/:id', protect, admin, validateMongoId, deleteUser);
 router.put('/:id/password', protect, validateMongoId, validateChangePassword, changePassword);
 
 module.exports = router;
+

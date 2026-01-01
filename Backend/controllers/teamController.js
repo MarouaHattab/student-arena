@@ -1,6 +1,5 @@
 const Team = require('../models/Team');
 const User = require('../models/User');
-const TeamInvitation = require('../models/TeamInvitation');
 const { v4: uuidv4 } = require('uuid');
 
 // @desc    Créer une équipe

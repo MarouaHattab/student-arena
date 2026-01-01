@@ -1,23 +1,12 @@
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar";
 
 const Home = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    await logout();
-    navigate("/login");
-  };
+  const { user } = useAuth();
 
   return (
     <div style={styles.container}>
-      <div style={styles.header}>
-        <h1 style={styles.title}>Student Arena</h1>
-        <button onClick={handleLogout} style={styles.logoutBtn}>
-          Déconnexion
-        </button>
-      </div>
+      <Navbar />
 
       <div style={styles.content}>
         <div style={styles.card}>
@@ -55,30 +44,7 @@ const Home = () => {
 const styles = {
   container: {
     minHeight: "100vh",
-    backgroundColor: "#f5f5f5",
-  },
-  header: {
-    backgroundColor: "white",
-    padding: "20px 40px",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-  },
-  title: {
-    fontSize: "24px",
-    fontWeight: "bold",
-    color: "#333",
-    margin: 0,
-  },
-  logoutBtn: {
-    padding: "10px 20px",
-    backgroundColor: "#333",
-    color: "white",
-    border: "none",
-    borderRadius: "4px",
-    cursor: "pointer",
-    fontSize: "14px",
+    backgroundColor: "#f8fafc",
   },
   content: {
     padding: "40px",
@@ -88,36 +54,39 @@ const styles = {
   card: {
     backgroundColor: "white",
     padding: "40px",
-    borderRadius: "8px",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    borderRadius: "12px",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+    border: "1px solid #e2e8f0",
     maxWidth: "600px",
     width: "100%",
   },
   welcomeTitle: {
     fontSize: "28px",
     fontWeight: "bold",
-    color: "#333",
+    color: "#1e293b",
     marginBottom: "30px",
   },
   info: {
     display: "flex",
     flexDirection: "column",
-    gap: "20px",
+    gap: "16px",
   },
   infoItem: {
     display: "flex",
     justifyContent: "space-between",
-    padding: "15px",
-    backgroundColor: "#f9f9f9",
-    borderRadius: "4px",
+    padding: "14px 16px",
+    backgroundColor: "#f8fafc",
+    borderRadius: "8px",
   },
   infoLabel: {
     fontWeight: "500",
-    color: "#666",
+    color: "#64748b",
+    fontSize: "14px",
   },
   infoValue: {
-    color: "#333",
+    color: "#1e293b",
     fontWeight: "600",
+    fontSize: "14px",
   },
 };
 

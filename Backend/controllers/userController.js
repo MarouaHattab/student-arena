@@ -1,6 +1,51 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 
+// @desc    Récupérer le profil de l'utilisateur connecté
+// @route   GET /api/users/profile
+// @access  Private
+const getProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id)
+      .select('-password')
+      .populate('team', 'name description')
+      .populate('submissions')
+      .populate('registeredProjects', 'title status');
+
+    if (!user) {
+      return res.status(404).json({ message: 'Utilisateur non trouvé' });
+    }
+
+    // Construire la réponse avec les données de profil complètes
+    const profileData = {
+      _id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      userName: user.userName,
+      bio: user.bio || '',
+      points: user.points || 0,
+      role: user.role,
+      team: user.team ? {
+        _id: user.team._id,
+        name: user.team.name,
+        description: user.team.description
+      } : null,
+      isTeamLeader: user.isTeamLeader,
+      submissionsCount: user.submissions?.length || 0,
+      registeredProjectsCount: user.registeredProjects?.length || 0,
+      registeredProjects: user.registeredProjects,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
+    };
+
+    res.json(profileData);
+  } catch (error) {
+    console.error('Erreur getProfile:', error);
+    res.status(500).json({ message: 'Erreur serveur', error: error.message });
+  }
+};
+
 // @desc    Récupérer tous les utilisateurs
 // @route   GET /api/users
 // @access  Private/Admin
@@ -182,6 +227,7 @@ const patchUser = async (req, res) => {
 };
 
 module.exports = {
+  getProfile,
   getUsers,
   getUserById,
   updateUser,
