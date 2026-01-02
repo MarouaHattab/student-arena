@@ -301,4 +301,4 @@ projet-mern/
         │   └── index.css   # Styles Globaux
 ```
 
-Développé avec ❤️ pour la **Student Arena Community**.
+Développé Par Maroua HATTAB 
