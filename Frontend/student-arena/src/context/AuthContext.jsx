@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { authAPI } from "../api/authApi";
+import api from "../api/axiosConfig";
 
 const AuthContext = createContext(null);
 
@@ -21,7 +21,8 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       setError(null);
-      const data = await authAPI.register(userData);
+      const res = await api.post('/auth/register', userData);
+      const data = res.data;
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data));
       setUser(data);
@@ -37,7 +38,8 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     try {
       setError(null);
-      const data = await authAPI.login(credentials);
+      const res = await api.post('/auth/login', credentials);
+      const data = res.data;
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data));
       setUser(data);
@@ -52,7 +54,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await authAPI.logout();
+      await api.post('/auth/logout');
     } catch (err) {
       console.error("Logout error:", err);
     } finally {

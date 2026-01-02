@@ -59,6 +59,9 @@ const register = async (req, res) => {
         email: user.email,
         userName: user.userName,
         role: user.role,
+        points: user.points || 0,
+        registeredProjects: user.registeredProjects || [],
+        createdAt: user.createdAt,
         token: generateToken(user._id)
       });
     } else {
@@ -99,6 +102,8 @@ const login = async (req, res) => {
       isTeamLeader: user.isTeamLeader,
       team: user.team,
       points: user.points,
+      registeredProjects: user.registeredProjects || [],
+      createdAt: user.createdAt,
       token: generateToken(user._id)
     });
   } catch (error) {

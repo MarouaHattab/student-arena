@@ -16,8 +16,7 @@ const {
   generateProjectSummary,
   generateUserSummary,
   // Génération de contenu
-  generateProjectIdea,
-  generateTeamFeedback
+  generateProjectIdea
 } = require('../controllers/aiController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
@@ -53,8 +52,5 @@ router.get('/user-summary/:userId', protect, generateUserSummary);
 // ==================== ROUTES GÉNÉRATION DE CONTENU ====================
 // Générer une idée de projet
 router.post('/generate-project-idea', protect, generateProjectIdea);
-
-// Générer un feedback pour une équipe (Admin seulement)
-router.post('/team-feedback', protect, admin, generateTeamFeedback);
 
 module.exports = router;

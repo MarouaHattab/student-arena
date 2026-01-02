@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import api from "../api/axiosConfig";
 
 const PrivateRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();

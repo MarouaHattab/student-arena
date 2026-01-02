@@ -8,7 +8,8 @@ const {
   patchUser,
   deleteUser,
   changePassword,
-  getUsersLeaderboard
+  getUsersLeaderboard,
+  adminCreateUser
 } = require('../controllers/userController');
 const { protect, admin } = require('../middleware/authMiddleware');
 const { validateUpdateUser, validateChangePassword, validateMongoId } = require('../middleware/validationMiddleware');
@@ -21,6 +22,7 @@ router.get('/profile', protect, getProfile);
 
 // Routes protégées
 router.get('/', protect, admin, getUsers);
+router.post('/', protect, admin, adminCreateUser);
 router.get('/:id', protect, validateMongoId, getUserById);
 router.put('/:id', protect, validateMongoId, validateUpdateUser, updateUser);
 router.patch('/:id', protect, validateMongoId, validateUpdateUser, patchUser);

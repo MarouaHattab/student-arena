@@ -56,6 +56,7 @@ const getTeams = async (req, res) => {
     const teams = await Team.find()
       .populate('leaders', 'firstName lastName userName')
       .populate('members', 'firstName lastName userName')
+      .populate('registeredProjects', 'title')
       .sort({ points: -1 });
 
     res.json(teams);
@@ -162,10 +163,10 @@ const addMember = async (req, res) => {
       return res.status(404).json({ message: 'Équipe non trouvée' });
     }
 
-    // Vérifier si l'utilisateur est un leader
+    // Vérifier si l'utilisateur est un leader ou admin
     const isLeader = team.leaders.some(l => l.toString() === req.user._id.toString());
-    if (!isLeader) {
-      return res.status(403).json({ message: 'Seul un leader peut ajouter des membres' });
+    if (!isLeader && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Seul un leader ou administrateur peut ajouter des membres' });
     }
 
     // Vérifier si l'équipe est complète
@@ -311,10 +312,10 @@ const removeMember = async (req, res) => {
       return res.status(404).json({ message: 'Équipe non trouvée' });
     }
 
-    // Vérifier si l'utilisateur est un leader
+    // Vérifier si l'utilisateur est un leader ou admin
     const isLeader = team.leaders.some(l => l.toString() === req.user._id.toString());
-    if (!isLeader) {
-      return res.status(403).json({ message: 'Seul un leader peut retirer des membres' });
+    if (!isLeader && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Seul un leader ou administrateur peut retirer des membres' });
     }
 
     const userIdToRemove = req.params.userId;

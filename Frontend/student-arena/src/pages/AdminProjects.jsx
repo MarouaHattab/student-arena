@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { projectAPI, projectAiAPI } from "../api/projectApi";
-import { userAPI } from "../api/userApi";
+import api from "../api/axiosConfig";
 import Navbar from "../components/Navbar";
 
 const AdminProjects = () => {
@@ -45,7 +44,7 @@ const AdminProjects = () => {
   const checkAdminAndFetch = async () => {
     try {
       setLoading(true);
-      const profileData = await userAPI.getProfile();
+      const profileData = (await api.get('/users/profile')).data;
       setProfile(profileData);
       
       if (profileData.role !== "admin") {
@@ -53,7 +52,7 @@ const AdminProjects = () => {
         return;
       }
 
-      const projectsData = await projectAPI.getProjects();
+      const projectsData = (await api.get('/projects')).data;
       setProjects(projectsData);
     } catch (err) {
       console.error("Error:", err);
@@ -83,7 +82,7 @@ const AdminProjects = () => {
     e.preventDefault();
     try {
       setIsSubmitting(true);
-      await projectAPI.createProject(formData);
+      await api.post('/projects', formData);
       setShowCreateModal(false);
       resetForm();
       await checkAdminAndFetch();
@@ -98,7 +97,7 @@ const AdminProjects = () => {
     e.preventDefault();
     try {
       setIsSubmitting(true);
-      await projectAPI.updateProject(selectedProject._id, formData);
+      await api.put(`/projects/${selectedProject._id}`, formData);
       setShowEditModal(false);
       setSelectedProject(null);
       await checkAdminAndFetch();
@@ -112,7 +111,7 @@ const AdminProjects = () => {
   const handleDelete = async (projectId) => {
     if (!confirm("Êtes-vous sûr de vouloir supprimer ce projet ?")) return;
     try {
-      await projectAPI.deleteProject(projectId);
+      await api.delete(`/projects/${projectId}`);
       await checkAdminAndFetch();
     } catch (err) {
       alert(err.response?.data?.message || "Erreur lors de la suppression");
@@ -121,7 +120,7 @@ const AdminProjects = () => {
 
   const handleStatusChange = async (projectId, newStatus) => {
     try {
-      await projectAPI.changeStatus(projectId, newStatus);
+      await api.put(`/projects/${projectId}/status`, { status: newStatus });
       await checkAdminAndFetch();
     } catch (err) {
       alert(err.response?.data?.message || "Erreur");
@@ -165,7 +164,8 @@ const AdminProjects = () => {
     }
     try {
       setIsGeneratingTags(true);
-      const response = await projectAiAPI.generateTags(formData.title, formData.description);
+      const res = await api.post('/ai/generate-tags', { title: formData.title, description: formData.description });
+      const response = res.data;
       if (response.success && response.tags) {
         setFormData({ ...formData, tags: response.tags });
       }
@@ -183,7 +183,8 @@ const AdminProjects = () => {
     }
     try {
       setIsImprovingDesc(true);
-      const response = await projectAiAPI.improveDescription(formData.title, formData.description);
+      const res = await api.post('/ai/improve-description', { title: formData.title, description: formData.description, style: 'professional' });
+      const response = res.data;
       if (response.success && response.improvedDescription) {
         setFormData({ ...formData, description: response.improvedDescription });
       }
@@ -201,9 +202,10 @@ const AdminProjects = () => {
     }
     try {
       setIsGeneratingCriteria(true);
-      const response = await projectAiAPI.generateCriteria(formData.title, formData.description, formData.type);
-      if (response.success && response.successCriteria) {
-        setFormData({ ...formData, successCriteria: response.successCriteria });
+      const res = await api.post('/ai/generate-criteria', { title: formData.title, description: formData.description, type: formData.type });
+      const response = res.data;
+      if (response.success && response.criteria) {
+        setFormData({ ...formData, successCriteria: response.criteria });
       }
     } catch (err) {
       alert("Erreur lors de la génération des critères");
@@ -485,6 +487,9 @@ const AdminProjects = () => {
                   </td>
                   <td style={styles.td}>
                     <div style={styles.actions}>
+                      <button onClick={() => navigate(`/admin/projects/${project._id}/submissions`)} style={styles.subBtn}>
+                        Soumissions
+                      </button>
                       <button onClick={() => openEditModal(project)} style={styles.editBtn}>
                         Modifier
                       </button>
@@ -647,6 +652,15 @@ const styles = {
   actions: {
     display: "flex",
     gap: "8px",
+  },
+  subBtn: {
+    padding: "6px 14px",
+    background: "#1e293b",
+    color: "#fff",
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontSize: "13px",
   },
   editBtn: {
     padding: "6px 14px",

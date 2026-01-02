@@ -1,9 +1,91 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { teamAPI } from "../api/teamApi";
-import { userAPI } from "../api/userApi";
+import api from "../api/axiosConfig";
 import Navbar from "../components/Navbar";
+
+const TEAM_STYLES = `
+  .team-page { min-height: 100vh; background: #f8fafc; }
+  
+  /* Empty Case */
+  .no-team-hero { text-align: center; padding: 100px 40px; margin-top: 40px; }
+  .no-team-icon { font-size: 64px; margin-bottom: 24px; }
+  .no-team-title { font-size: 36px; font-weight: 800; color: #1e293b; margin-bottom: 16px; letter-spacing: -1px; }
+  .no-team-text { color: #64748b; font-size: 18px; max-width: 500px; margin: 0 auto 40px; line-height: 1.6; }
+  .no-team-actions { display: flex; gap: 20px; justify-content: center; }
+  .btn-outline-large { padding: 16px 32px; border-radius: 16px; border: 2px solid #e2e8f0; background: #fff; color: #475569; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+  .btn-primary-large { padding: 16px 32px; border-radius: 16px; border: none; background: #6366f1; color: #fff; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3); }
+
+  /* Dashboard Header */
+  .team-dash-header { display: flex; justify-content: space-between; align-items: center; padding: 32px; margin-bottom: 32px; background: #fff; }
+  .team-info-main { display: flex; gap: 24px; align-items: center; }
+  .team-large-avatar { width: 90px; height: 90px; background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); border-radius: 24px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 42px; font-weight: 800; box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2); }
+  .team-title { font-size: 32px; font-weight: 800; color: #1e293b; margin: 0; letter-spacing: -1px; }
+  .team-slogan { font-size: 16px; color: #64748b; font-style: italic; margin-top: 4px; }
+  .team-meta-pills { display: flex; gap: 12px; margin-top: 16px; }
+  .meta-pill { padding: 4px 12px; background: #f1f5f9; border-radius: 8px; font-size: 13px; font-weight: 700; color: #475569; border: 1px solid #e2e8f0; }
+  .status-pill { padding: 4px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+  .status-pill.active { background: #f0fdf4; color: #16a34a; border: 1px solid #dcfce7; }
+  .status-pill.inactive { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+  .status-pill.archived { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
+  
+  .team-admin-actions { display: flex; gap: 8px; }
+  .btn-icon-edit-large, .btn-icon-delete-large { padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff; cursor: pointer; transition: all 0.2s; font-size: 18px; }
+  .btn-icon-delete-large:hover { background: #fef2f2; border-color: #fee2e2; }
+  .btn-icon-edit-large:hover { background: #f8fafc; border-color: #cbd5e1; }
+
+  /* Content Grid */
+  .team-content-grid { display: grid; grid-template-columns: 400px 1fr; gap: 32px; }
+  .side-card { margin-bottom: 24px; padding: 24px; }
+  .side-title { font-size: 15px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; }
+  
+  .invite-box { display: flex; gap: 10px; margin-bottom: 12px; }
+  .invite-code-display { flex: 1; padding: 12px; background: #f8fafc; border-radius: 12px; border: 1px dashed #cbd5e1; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 800; color: #1e293b; letter-spacing: 2px; }
+  .btn-copy { padding: 0 16px; background: #6366f1; color: #fff; border: none; border-radius: 12px; font-weight: 700; font-size: 13px; cursor: pointer; }
+  .invite-hint { font-size: 12px; color: #94a3b8; line-height: 1.5; margin: 0; }
+
+  .member-list-stack { display: flex; flex-direction: column; gap: 12px; }
+  .member-item-row { display: flex; align-items: center; gap: 14px; padding: 14px; background: #f8fafc; border-radius: 16px; border: 1px solid #f1f5f9; transition: transform 0.2s; }
+  .member-avatar-mini { width: 40px; height: 40px; background: #eef2ff; color: #6366f1; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; }
+  .member-details { flex: 1; display: flex; flex-direction: column; }
+  .member-realname { font-size: 14px; font-weight: 700; color: #1e293b; }
+  .member-handle { font-size: 11px; color: #94a3b8; font-weight: 600; }
+  .badge-leader { padding: 4px 8px; background: #fef3c7; color: #92400e; border-radius: 6px; font-size: 10px; font-weight: 800; }
+  .badge-member { padding: 4px 8px; background: #f1f5f9; color: #64748b; border-radius: 6px; font-size: 10px; font-weight: 800; }
+  
+  .member-controls { display: flex; gap: 4px; }
+  .btn-control-mini { padding: 6px; border: none; background: #fff; border-radius: 8px; cursor: pointer; font-size: 12px; border: 1px solid #e2e8f0; }
+  .btn-control-mini.danger { color: #ef4444; border-color: #fee2e2; }
+  
+  .btn-add-member-full { width: 100%; margin-top: 20px; padding: 12px; background: #fff; color: #6366f1; border: 2px dashed #ddd6fe; border-radius: 16px; font-weight: 800; font-size: 14px; cursor: pointer; transition: all 0.2s; }
+  .btn-add-member-full:hover { background: #f5f3ff; border-style: solid; }
+
+  .main-info-card { padding: 32px; margin-bottom: 32px; }
+  .description-text-large { font-size: 16px; line-height: 1.8; color: #475569; margin: 0; }
+  
+  .danger-zone { background: #fff; border: 1px dashed #fecaca; }
+  .danger-content { display: flex; justify-content: space-between; align-items: center; }
+  .danger-title { font-size: 16px; font-weight: 800; color: #dc2626; margin: 0; }
+  .danger-subtitle { font-size: 13px; color: #64748b; margin-top: 2px; }
+  .btn-danger-outline { padding: 10px 20px; background: #fff; border: 1px solid #fecaca; color: #dc2626; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+  .btn-danger-outline:hover { background: #fee2e2; }
+
+  .loading-screen { height: 100vh; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #6366f1; font-size: 1.25rem; }
+  
+  /* Modals Shared */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 2000; }
+  .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); border-radius: 24px; border: 1px solid #fff; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1); width: 100%; max-width: 460px; overflow: hidden; }
+  .modal-header { padding: 24px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+  .modal-header h2 { font-size: 20px; font-weight: 800; color: #1e293b; margin: 0; }
+  .close-btn { width: 32px; height: 32px; border-radius: 50%; background: #f1f5f9; border: none; color: #64748b; cursor: pointer; font-size: 20px; }
+  .modal-body { padding: 24px; }
+  .form-group { margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px; }
+  .form-group label { font-size: 13px; font-weight: 700; color: #475569; }
+  .form-group input, .form-group textarea { padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 14px; outline: none; transition: border-color 0.2s; }
+  .form-group input:focus { border-color: #6366f1; }
+  .btn-primary.full-width { width: 100%; padding: 14px; background: #6366f1; color: #fff; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; transition: transform 0.1s; }
+  .btn-primary.full-width:active { transform: scale(0.98); }
+`;
 
 const Team = () => {
   const navigate = useNavigate();
@@ -36,11 +118,11 @@ const Team = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const profileData = await userAPI.getProfile();
+      const profileData = (await api.get('/users/profile')).data;
       setProfile(profileData);
 
       if (profileData.team) {
-        const teamData = await teamAPI.getTeamById(profileData.team._id);
+        const teamData = (await api.get(`/teams/${profileData.team._id}`)).data;
         setTeam(teamData);
         setEditForm({
           name: teamData.name || "",
@@ -48,7 +130,6 @@ const Team = () => {
           slogan: teamData.slogan || ""
         });
       } else {
-        // User has no team - clear the team state
         setTeam(null);
       }
     } catch (err) {
@@ -62,7 +143,7 @@ const Team = () => {
     e.preventDefault();
     try {
       setIsSubmitting(true);
-      await teamAPI.createTeam(createForm);
+      await api.post('/teams', createForm);
       setShowCreateModal(false);
       setCreateForm({ name: "", description: "", slogan: "" });
       await fetchData();
@@ -77,7 +158,7 @@ const Team = () => {
     e.preventDefault();
     try {
       setIsSubmitting(true);
-      await teamAPI.joinByCode(joinCode);
+      await api.post('/teams/join', { invitationCode: joinCode });
       setShowJoinModal(false);
       setJoinCode("");
       await fetchData();
@@ -92,7 +173,7 @@ const Team = () => {
     e.preventDefault();
     try {
       setIsSubmitting(true);
-      await teamAPI.updateTeam(team._id, editForm);
+      await api.put(`/teams/${team._id}`, editForm);
       setShowEditModal(false);
       await fetchData();
     } catch (err) {
@@ -103,28 +184,24 @@ const Team = () => {
   };
 
   const handleLeaveTeam = async () => {
-    if (!confirm("Êtes-vous sûr de vouloir quitter cette équipe ?")) return;
-    try {
-      setIsSubmitting(true);
-      await teamAPI.leaveTeam(team._id);
-      await fetchData();
-    } catch (err) {
-      alert(err.response?.data?.message || "Erreur lors de la sortie");
-    } finally {
-      setIsSubmitting(false);
+    if (window.confirm("Êtes-vous sûr de vouloir quitter l'équipe ?")) {
+      try {
+        await api.post(`/teams/${team._id}/leave`);
+        await fetchData();
+      } catch (err) {
+        alert(err.response?.data?.message || "Erreur lors du départ");
+      }
     }
   };
 
   const handleDeleteTeam = async () => {
-    if (!confirm("Êtes-vous sûr de vouloir supprimer cette équipe ? Cette action est irréversible.")) return;
-    try {
-      setIsSubmitting(true);
-      await teamAPI.deleteTeam(team._id);
-      await fetchData();
-    } catch (err) {
-      alert(err.response?.data?.message || "Erreur lors de la suppression");
-    } finally {
-      setIsSubmitting(false);
+    if (window.confirm("Action irréversible : Supprimer définitivement l'équipe ?")) {
+      try {
+        await api.delete(`/teams/${team._id}`);
+        await fetchData();
+      } catch (err) {
+        alert(err.response?.data?.message || "Erreur lors de la suppression");
+      }
     }
   };
 
@@ -132,9 +209,9 @@ const Team = () => {
     e.preventDefault();
     try {
       setIsSubmitting(true);
-      await teamAPI.addMember(team._id, addMemberInput);
-      setShowAddMemberModal(false);
+      await api.post(`/teams/${team._id}/add-member`, { emailOrUsername: addMemberInput });
       setAddMemberInput("");
+      setShowAddMemberModal(false);
       await fetchData();
     } catch (err) {
       alert(err.response?.data?.message || "Erreur lors de l'ajout");
@@ -144,167 +221,104 @@ const Team = () => {
   };
 
   const handleRemoveMember = async (memberId, memberName) => {
-    if (!confirm(`Êtes-vous sûr de vouloir retirer ${memberName} de l'équipe ?`)) return;
-    try {
-      await teamAPI.removeMember(team._id, memberId);
-      await fetchData();
-    } catch (err) {
-      alert(err.response?.data?.message || "Erreur lors du retrait");
+    if (window.confirm(`Retirer ${memberName} de l'équipe ?`)) {
+      try {
+        await api.delete(`/teams/${team._id}/members/${memberId}`);
+        await fetchData();
+      } catch (err) {
+        alert(err.response?.data?.message || "Erreur lors du retrait");
+      }
     }
   };
 
-  const handleGiveLeadership = async (userId, userName) => {
-    if (!confirm(`Donner le rôle de leader à ${userName} ?`)) return;
-    try {
-      await teamAPI.giveLeadership(team._id, userId);
-      await fetchData();
-    } catch (err) {
-      alert(err.response?.data?.message || "Erreur");
+  const handleGiveLeadership = async (memberId, memberName) => {
+    if (window.confirm(`Promouvoir ${memberName} au rang de leader ?`)) {
+      try {
+        await api.post(`/teams/${team._id}/give-leadership/${memberId}`);
+        await fetchData();
+      } catch (err) {
+        alert(err.response?.data?.message || "Erreur lors de la promotion");
+      }
     }
   };
 
-  const handleRemoveLeadership = async (userId, userName) => {
-    if (!confirm(`Retirer le rôle de leader de ${userName} ?`)) return;
-    try {
-      await teamAPI.removeLeadership(team._id, userId);
-      await fetchData();
-    } catch (err) {
-      alert(err.response?.data?.message || "Erreur");
+  const handleRemoveLeadership = async (memberId, memberName) => {
+    if (window.confirm(`Rétrograder ${memberName} au rang de membre ?`)) {
+      try {
+        await api.delete(`/teams/${team._id}/remove-leadership/${memberId}`);
+        await fetchData();
+      } catch (err) {
+        alert(err.response?.data?.message || "Erreur de rétrogradation");
+      }
     }
+  };
+
+  const copyInvitationCode = () => {
+    navigator.clipboard.writeText(team.invitationCode);
+    alert("Code copié dans le presse-papier !");
   };
 
   const isLeader = team?.leaders?.some(l => l._id === profile?._id);
-  const copyInvitationCode = () => {
-    navigator.clipboard.writeText(team?.invitationCode);
-    alert("Code d'invitation copié !");
-  };
 
-  if (loading) {
-    return (
-      <div style={styles.container}>
-        <Navbar />
-        <div style={styles.loadingContainer}>
-          <div style={styles.spinner}></div>
-          <p style={styles.loadingText}>Chargement...</p>
-        </div>
-        <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
-      </div>
-    );
-  }
+  if (loading) return <div className="loading-screen"><style>{TEAM_STYLES}</style>Chargement du QG...</div>;
 
-  // No team view
   if (!team) {
     return (
-      <div style={styles.container}>
+      <div className="team-page">
+        <style>{TEAM_STYLES}</style>
         <Navbar />
-        <main style={styles.main}>
-          <div style={styles.noTeamContainer}>
-            <div style={styles.noTeamIcon}>T</div>
-            <h2 style={styles.noTeamTitle}>Vous n'avez pas encore d'équipe</h2>
-            <p style={styles.noTeamText}>
-              Créez votre propre équipe ou rejoignez une équipe existante avec un code d'invitation.
-            </p>
-            <div style={styles.noTeamActions}>
-              <button onClick={() => setShowCreateModal(true)} style={styles.primaryBtn}>
-                Créer une équipe
-              </button>
-              <button onClick={() => setShowJoinModal(true)} style={styles.secondaryBtn}>
-                Rejoindre avec un code
-              </button>
-            </div>
+        <main className="page-container">
+          <div className="no-team-hero card premium-shadow fade-in">
+              <div className="no-team-icon">🛡️</div>
+              <h1 className="no-team-title">Rejoignez l'élite</h1>
+              <p className="no-team-text">Pour participer aux projets d'envergure, vous avez besoin d'une escouade. Créez la vôtre ou rejoignez des experts.</p>
+              <div className="no-team-actions">
+                  <button onClick={() => setShowJoinModal(true)} className="btn-outline-large">Rejoindre via code</button>
+                  <button onClick={() => setShowCreateModal(true)} className="btn-primary-large">Créer une Équipe</button>
+              </div>
           </div>
         </main>
 
-        {/* Create Team Modal */}
         {showCreateModal && (
-          <div style={styles.modalOverlay} onClick={() => setShowCreateModal(false)}>
-            <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-              <div style={styles.modalHeader}>
-                <h2 style={styles.modalTitle}>Créer une équipe</h2>
-                <button onClick={() => setShowCreateModal(false)} style={styles.modalClose}>×</button>
-              </div>
-              <form onSubmit={handleCreateTeam}>
-                <div style={styles.modalBody}>
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Nom de l'équipe *</label>
-                    <input
-                      type="text"
-                      value={createForm.name}
-                      onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
-                      style={styles.input}
-                      placeholder="Ex: Les Innovateurs"
-                      required
-                    />
-                  </div>
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Description</label>
-                    <textarea
-                      value={createForm.description}
-                      onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })}
-                      style={styles.textarea}
-                      placeholder="Décrivez votre équipe..."
-                      rows={3}
-                    />
-                  </div>
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Slogan</label>
-                    <input
-                      type="text"
-                      value={createForm.slogan}
-                      onChange={(e) => setCreateForm({ ...createForm, slogan: e.target.value })}
-                      style={styles.input}
-                      placeholder="Ex: Ensemble, on va plus loin !"
-                    />
-                  </div>
+          <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
+            <div className="modal-content glass-card" onClick={e => e.stopPropagation()}>
+                <div className="modal-header">
+                  <h2>Fonder une Équipe</h2>
+                  <button className="close-btn" onClick={() => setShowCreateModal(false)}>×</button>
                 </div>
-                <div style={styles.modalFooter}>
-                  <button type="button" onClick={() => setShowCreateModal(false)} style={styles.cancelBtn}>
-                    Annuler
-                  </button>
-                  <button type="submit" style={styles.submitBtn} disabled={isSubmitting}>
-                    {isSubmitting ? "Création..." : "Créer l'équipe"}
-                  </button>
-                </div>
-              </form>
+                <form onSubmit={handleCreateTeam} className="modal-body">
+                   <div className="form-group">
+                      <label>Nom de l'escouade</label>
+                      <input type="text" value={createForm.name} onChange={e => setCreateForm({...createForm, name: e.target.value})} required placeholder="Ex: Neural Knights" />
+                   </div>
+                   <div className="form-group">
+                      <label>Slogan</label>
+                      <input type="text" value={createForm.slogan} onChange={e => setCreateForm({...createForm, slogan: e.target.value})} placeholder="Ex: On code, vous gagnez" />
+                   </div>
+                   <div className="form-group">
+                      <label>Description des objectifs</label>
+                      <textarea value={createForm.description} onChange={e => setCreateForm({...createForm, description: e.target.value})} placeholder="Quelle est votre mission ?" />
+                   </div>
+                   <button type="submit" disabled={isSubmitting} className="btn-primary full-width">Lancer l'Équipe</button>
+                </form>
             </div>
           </div>
         )}
 
-        {/* Join Team Modal */}
         {showJoinModal && (
-          <div style={styles.modalOverlay} onClick={() => setShowJoinModal(false)}>
-            <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-              <div style={styles.modalHeader}>
-                <h2 style={styles.modalTitle}>Rejoindre une équipe</h2>
-                <button onClick={() => setShowJoinModal(false)} style={styles.modalClose}>×</button>
-              </div>
-              <form onSubmit={handleJoinTeam}>
-                <div style={styles.modalBody}>
-                  <p style={styles.modalDescription}>
-                    Entrez le code d'invitation fourni par le leader de l'équipe.
-                  </p>
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Code d'invitation</label>
-                    <input
-                      type="text"
-                      value={joinCode}
-                      onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                      style={{ ...styles.input, textAlign: "center", letterSpacing: "4px", fontSize: "18px" }}
-                      placeholder="XXXXXXXX"
-                      maxLength={8}
-                      required
-                    />
-                  </div>
+          <div className="modal-overlay" onClick={() => setShowJoinModal(false)}>
+            <div className="modal-content glass-card" onClick={e => e.stopPropagation()}>
+                <div className="modal-header">
+                  <h2>Rejoindre une Équipe</h2>
+                  <button className="close-btn" onClick={() => setShowJoinModal(false)}>×</button>
                 </div>
-                <div style={styles.modalFooter}>
-                  <button type="button" onClick={() => setShowJoinModal(false)} style={styles.cancelBtn}>
-                    Annuler
-                  </button>
-                  <button type="submit" style={styles.submitBtn} disabled={isSubmitting}>
-                    {isSubmitting ? "..." : "Rejoindre"}
-                  </button>
-                </div>
-              </form>
+                <form onSubmit={handleJoinTeam} className="modal-body">
+                   <div className="form-group">
+                      <label>Code d'invitation</label>
+                      <input type="text" value={joinCode} onChange={e => setJoinCode(e.target.value)} required placeholder="TEAM-XXXX-1234" />
+                   </div>
+                   <button type="submit" disabled={isSubmitting} className="btn-primary full-width">Vérifier le Code & Entrer</button>
+                </form>
             </div>
           </div>
         )}
@@ -312,204 +326,120 @@ const Team = () => {
     );
   }
 
-  // Team exists view
   return (
-    <div style={styles.container}>
+    <div className="team-page">
+      <style>{TEAM_STYLES}</style>
       <Navbar />
-      <main style={styles.main}>
-        {/* Team Header */}
-        <div style={styles.teamHeader}>
-          <div style={styles.teamHeaderLeft}>
-            <div style={styles.teamAvatar}>
-              {team.name?.charAt(0)?.toUpperCase() || "T"}
-            </div>
-            <div style={styles.teamHeaderInfo}>
-              <h1 style={styles.teamName}>{team.name}</h1>
-              {team.slogan && <p style={styles.teamSlogan}>"{team.slogan}"</p>}
-              <div style={styles.teamMeta}>
-                <span style={styles.teamMetaItem}>{team.members?.length || 0} / {team.maxMembers} membres</span>
-                <span style={styles.teamMetaDivider}>|</span>
-                <span style={styles.teamMetaItem}>{team.points || 0} points</span>
-                <span style={styles.teamMetaDivider}>|</span>
-                <span style={{
-                  ...styles.statusBadge,
-                  background: team.status === 'active' ? '#dcfce7' : '#fee2e2',
-                  color: team.status === 'active' ? '#166534' : '#991b1b'
-                }}>
-                  {team.status === 'active' ? 'Active' : 'Inactive'}
-                </span>
+      <main className="page-container">
+        <div className="team-dash-header card premium-shadow">
+           <div className="team-info-main">
+              <div className="team-large-avatar">
+                {team.name?.charAt(0)?.toUpperCase()}
               </div>
-            </div>
-          </div>
-          {isLeader && (
-            <div style={styles.teamActions}>
-              <button onClick={() => setShowEditModal(true)} style={styles.editBtn}>
-                Modifier
-              </button>
-              <button onClick={handleDeleteTeam} style={styles.deleteBtn}>
-                Supprimer
-              </button>
-            </div>
-          )}
+              <div className="team-text-meta">
+                  <h1 className="team-title">{team.name}</h1>
+                  <p className="team-slogan">"{team.slogan || 'Prêts à relever tous les défis'}"</p>
+                  <div className="team-meta-pills">
+                     <span className="meta-pill">👥 {team.members?.length} membres</span>
+                     <span className="meta-pill">🏆 {team.points} points</span>
+                     <span className={`status-pill ${team.status}`}>{team.status}</span>
+                  </div>
+              </div>
+           </div>
+           {isLeader && (
+             <div className="team-admin-actions">
+                <button onClick={() => setShowEditModal(true)} className="btn-icon-edit-large">⚙️</button>
+                <button onClick={handleDeleteTeam} className="btn-icon-delete-large">🗑️</button>
+             </div>
+           )}
         </div>
 
-        {/* Grid Layout */}
-        <div style={styles.grid}>
-          {/* Invitation Code Card */}
-          <div style={styles.card}>
-            <h3 style={styles.cardTitle}>Code d'invitation</h3>
-            <div style={styles.invitationCodeContainer}>
-              <div style={styles.invitationCode}>{team.invitationCode}</div>
-              <button onClick={copyInvitationCode} style={styles.copyBtn}>Copier</button>
-            </div>
-            <p style={styles.invitationHint}>
-              Partagez ce code avec vos coéquipiers pour qu'ils puissent rejoindre l'équipe.
-            </p>
-          </div>
-
-          {/* Description Card */}
-          <div style={styles.card}>
-            <h3 style={styles.cardTitle}>Description</h3>
-            <p style={styles.descriptionText}>
-              {team.description || "Aucune description renseignée."}
-            </p>
-          </div>
-
-          {/* Members Card */}
-          <div style={{ ...styles.card, gridColumn: "1 / -1" }}>
-            <div style={styles.cardHeader}>
-              <h3 style={styles.cardTitle}>Membres ({team.members?.length || 0}/{team.maxMembers})</h3>
-              {isLeader && team.members?.length < team.maxMembers && (
-                <button onClick={() => setShowAddMemberModal(true)} style={styles.addMemberBtn}>
-                  Ajouter un membre
-                </button>
-              )}
-            </div>
-            <div style={styles.membersList}>
-              {team.members?.map((member) => {
-                const isMemberLeader = team.leaders?.some(l => l._id === member._id);
-                const isCurrentUser = member._id === profile?._id;
-                return (
-                  <div key={member._id} style={styles.memberCard}>
-                    <div style={styles.memberAvatar}>
-                      {member.firstName?.charAt(0)}{member.lastName?.charAt(0)}
-                    </div>
-                    <div style={styles.memberInfo}>
-                      <p style={styles.memberName}>
-                        {member.firstName} {member.lastName}
-                        {isCurrentUser && <span style={styles.youBadge}>(vous)</span>}
-                      </p>
-                      <p style={styles.memberUsername}>@{member.userName}</p>
-                    </div>
-                    <div style={styles.memberRole}>
-                      {isMemberLeader ? (
-                        <span style={styles.leaderBadge}>Leader</span>
-                      ) : (
-                        <span style={styles.memberBadge}>Membre</span>
-                      )}
-                    </div>
-                    {isLeader && !isCurrentUser && (
-                      <div style={styles.memberActions}>
-                        {isMemberLeader ? (
-                          <button
-                            onClick={() => handleRemoveLeadership(member._id, member.firstName)}
-                            style={styles.actionBtn}
-                            title="Retirer le leadership"
-                          >
-                            Retirer leader
-                          </button>
-                        ) : (
-                          <>
-                            {team.leaders?.length < 2 && (
-                              <button
-                                onClick={() => handleGiveLeadership(member._id, member.firstName)}
-                                style={styles.actionBtn}
-                                title="Promouvoir leader"
-                              >
-                                Promouvoir
-                              </button>
-                            )}
-                            <button
-                              onClick={() => handleRemoveMember(member._id, member.firstName)}
-                              style={styles.removeBtn}
-                              title="Retirer de l'équipe"
-                            >
-                              Retirer
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Leave Team Card */}
-          <div style={{ ...styles.card, gridColumn: "1 / -1" }}>
-            <div style={styles.leaveSection}>
-              <div>
-                <h3 style={styles.leaveTitle}>Quitter l'équipe</h3>
-                <p style={styles.leaveText}>
-                  Vous ne pourrez plus accéder aux projets de l'équipe une fois parti.
-                </p>
+        <div className="team-content-grid">
+           <div className="team-side">
+              <div className="card side-card">
+                 <h3 className="side-title">Accès Privé</h3>
+                 <div className="invite-box">
+                    <code className="invite-code-display">{team.invitationCode}</code>
+                    <button onClick={copyInvitationCode} className="btn-copy">Copier Code</button>
+                 </div>
+                 <p className="invite-hint">Seuls les membres possédant ce code secret peuvent rejoindre l'escouade.</p>
               </div>
-              <button onClick={handleLeaveTeam} style={styles.leaveBtn}>
-                Quitter l'équipe
-              </button>
-            </div>
-          </div>
+
+              <div className="card side-card">
+                <h3 className="side-title">Membres de l'escouade ({team.members?.length}/{team.maxMembers})</h3>
+                <div className="member-list-stack">
+                  {team.members?.map(member => {
+                    const memberIsLeader = team.leaders?.some(l => l._id === member._id);
+                    const isMe = member._id === profile?._id;
+                    return (
+                      <div key={member._id} className="member-item-row">
+                         <div className="member-avatar-mini">
+                            {member.userName?.charAt(0)?.toUpperCase() || '?'}
+                         </div>
+                         <div className="member-details">
+                            <span className="member-realname">{member.firstName} {member.lastName} {isMe && '(C\'est vous)'}</span>
+                            <span className="member-handle">@{member.userName}</span>
+                         </div>
+                         <div className="member-badge-col">
+                            {memberIsLeader ? <span className="badge-leader">LEADER</span> : <span className="badge-member">PILOTE</span>}
+                         </div>
+                         {isLeader && !isMe && (
+                             <div className="member-controls">
+                                <button onClick={() => memberIsLeader ? handleRemoveLeadership(member._id, member.firstName) : handleGiveLeadership(member._id, member.firstName)} className="btn-control-mini" title="Modifier rang">👑</button>
+                                <button onClick={() => handleRemoveMember(member._id, member.firstName)} className="btn-control-mini danger" title="Exclure">✖</button>
+                             </div>
+                         )}
+                      </div>
+                    )
+                  })}
+                </div>
+                {isLeader && team.members?.length < team.maxMembers && (
+                    <button onClick={() => setShowAddMemberModal(true)} className="btn-add-member-full">+ Ajouter Recrue</button>
+                )}
+              </div>
+           </div>
+
+           <div className="team-main-content">
+              <div className="card main-info-card">
+                 <h3 className="side-title">Mission de l'Équipe</h3>
+                 <p className="description-text-large">{team.description || "Aucune mission définie pour le moment. Le leader peut en spécifier une dans les réglages."}</p>
+              </div>
+
+              <div className="card main-info-card danger-zone">
+                 <div className="danger-content">
+                    <div>
+                      <h4 className="danger-title">Quitter l'escouade</h4>
+                      <p className="danger-subtitle">Vous perdrez l'accès aux points de groupe et aux projets d'équipe.</p>
+                    </div>
+                    <button onClick={handleLeaveTeam} className="btn-danger-outline">Quitter</button>
+                 </div>
+              </div>
+           </div>
         </div>
       </main>
 
-      {/* Edit Team Modal */}
+      {/* Edit Modal */}
       {showEditModal && (
-        <div style={styles.modalOverlay} onClick={() => setShowEditModal(false)}>
-          <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <div style={styles.modalHeader}>
-              <h2 style={styles.modalTitle}>Modifier l'équipe</h2>
-              <button onClick={() => setShowEditModal(false)} style={styles.modalClose}>×</button>
+        <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
+          <div className="modal-content glass-card" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Réglages de l'Équipe</h2>
+              <button className="close-btn" onClick={() => setShowEditModal(false)}>×</button>
             </div>
-            <form onSubmit={handleUpdateTeam}>
-              <div style={styles.modalBody}>
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Nom de l'équipe</label>
-                  <input
-                    type="text"
-                    value={editForm.name}
-                    onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                    style={styles.input}
-                    required
-                  />
-                </div>
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Description</label>
-                  <textarea
-                    value={editForm.description}
-                    onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                    style={styles.textarea}
-                    rows={3}
-                  />
-                </div>
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Slogan</label>
-                  <input
-                    type="text"
-                    value={editForm.slogan}
-                    onChange={(e) => setEditForm({ ...editForm, slogan: e.target.value })}
-                    style={styles.input}
-                  />
-                </div>
-              </div>
-              <div style={styles.modalFooter}>
-                <button type="button" onClick={() => setShowEditModal(false)} style={styles.cancelBtn}>
-                  Annuler
-                </button>
-                <button type="submit" style={styles.submitBtn} disabled={isSubmitting}>
-                  {isSubmitting ? "..." : "Enregistrer"}
-                </button>
-              </div>
+            <form onSubmit={handleUpdateTeam} className="modal-body">
+               <div className="form-group">
+                  <label>Nom</label>
+                  <input type="text" value={editForm.name} onChange={e => setEditForm({...editForm, name: e.target.value})} required />
+               </div>
+               <div className="form-group">
+                  <label>Slogan</label>
+                  <input type="text" value={editForm.slogan} onChange={e => setEditForm({...editForm, slogan: e.target.value})} />
+               </div>
+               <div className="form-group">
+                  <label>Description / Mission</label>
+                  <textarea value={editForm.description} onChange={e => setEditForm({...editForm, description: e.target.value})} />
+               </div>
+               <button type="submit" disabled={isSubmitting} className="btn-primary full-width">Sauvegarder les modifications</button>
             </form>
           </div>
         </div>
@@ -517,520 +447,24 @@ const Team = () => {
 
       {/* Add Member Modal */}
       {showAddMemberModal && (
-        <div style={styles.modalOverlay} onClick={() => setShowAddMemberModal(false)}>
-          <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <div style={styles.modalHeader}>
-              <h2 style={styles.modalTitle}>Ajouter un membre</h2>
-              <button onClick={() => setShowAddMemberModal(false)} style={styles.modalClose}>×</button>
+        <div className="modal-overlay" onClick={() => setShowAddMemberModal(false)}>
+          <div className="modal-content glass-card" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Recruter un membre</h2>
+              <button className="close-btn" onClick={() => setShowAddMemberModal(false)}>×</button>
             </div>
-            <form onSubmit={handleAddMember}>
-              <div style={styles.modalBody}>
-                <p style={styles.modalDescription}>
-                  Entrez l'email ou le nom d'utilisateur du membre à ajouter.
-                </p>
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Email ou nom d'utilisateur</label>
-                  <input
-                    type="text"
-                    value={addMemberInput}
-                    onChange={(e) => setAddMemberInput(e.target.value)}
-                    style={styles.input}
-                    placeholder="email@example.com ou username"
-                    required
-                  />
-                </div>
-              </div>
-              <div style={styles.modalFooter}>
-                <button type="button" onClick={() => setShowAddMemberModal(false)} style={styles.cancelBtn}>
-                  Annuler
-                </button>
-                <button type="submit" style={styles.submitBtn} disabled={isSubmitting}>
-                  {isSubmitting ? "..." : "Ajouter"}
-                </button>
-              </div>
+            <form onSubmit={handleAddMember} className="modal-body">
+               <div className="form-group">
+                  <label>Email ou Nom d'utilisateur</label>
+                  <input type="text" value={addMemberInput} onChange={e => setAddMemberInput(e.target.value)} required placeholder="Ex: jean@test.com" />
+               </div>
+               <button type="submit" disabled={isSubmitting} className="btn-primary full-width">Envoyer l'ordre d'intégration</button>
             </form>
           </div>
         </div>
       )}
-
-      <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
     </div>
   );
-};
-
-const styles = {
-  container: {
-    minHeight: "100vh",
-    backgroundColor: "#f8fafc",
-  },
-  loadingContainer: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    height: "calc(100vh - 70px)",
-  },
-  spinner: {
-    width: "40px",
-    height: "40px",
-    border: "3px solid #e2e8f0",
-    borderTop: "3px solid #6366f1",
-    borderRadius: "50%",
-    animation: "spin 1s linear infinite",
-  },
-  loadingText: {
-    color: "#64748b",
-    marginTop: "16px",
-    fontSize: "16px",
-  },
-  main: {
-    maxWidth: "1000px",
-    margin: "0 auto",
-    padding: "32px 24px",
-  },
-  // No Team View
-  noTeamContainer: {
-    textAlign: "center",
-    padding: "60px 20px",
-    background: "#fff",
-    borderRadius: "16px",
-    border: "1px solid #e2e8f0",
-  },
-  noTeamIcon: {
-    width: "80px",
-    height: "80px",
-    background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
-    color: "#fff",
-    borderRadius: "50%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "32px",
-    fontWeight: "bold",
-    margin: "0 auto 24px",
-  },
-  noTeamTitle: {
-    fontSize: "24px",
-    fontWeight: "bold",
-    color: "#1e293b",
-    margin: "0 0 12px 0",
-  },
-  noTeamText: {
-    fontSize: "15px",
-    color: "#64748b",
-    margin: "0 0 32px 0",
-    maxWidth: "400px",
-    marginLeft: "auto",
-    marginRight: "auto",
-  },
-  noTeamActions: {
-    display: "flex",
-    gap: "16px",
-    justifyContent: "center",
-  },
-  primaryBtn: {
-    padding: "14px 28px",
-    background: "#6366f1",
-    color: "#fff",
-    border: "none",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontSize: "15px",
-    fontWeight: "500",
-  },
-  secondaryBtn: {
-    padding: "14px 28px",
-    background: "#fff",
-    color: "#475569",
-    border: "1px solid #e2e8f0",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontSize: "15px",
-    fontWeight: "500",
-  },
-  // Team Header
-  teamHeader: {
-    background: "#fff",
-    borderRadius: "12px",
-    padding: "28px",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "24px",
-    border: "1px solid #e2e8f0",
-  },
-  teamHeaderLeft: {
-    display: "flex",
-    alignItems: "center",
-    gap: "20px",
-  },
-  teamAvatar: {
-    width: "72px",
-    height: "72px",
-    background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
-    color: "#fff",
-    borderRadius: "16px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "28px",
-    fontWeight: "bold",
-  },
-  teamHeaderInfo: {},
-  teamName: {
-    fontSize: "24px",
-    fontWeight: "bold",
-    color: "#1e293b",
-    margin: "0 0 4px 0",
-  },
-  teamSlogan: {
-    fontSize: "14px",
-    color: "#64748b",
-    fontStyle: "italic",
-    margin: "0 0 12px 0",
-  },
-  teamMeta: {
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-  },
-  teamMetaItem: {
-    fontSize: "13px",
-    color: "#64748b",
-  },
-  teamMetaDivider: {
-    color: "#e2e8f0",
-  },
-  statusBadge: {
-    padding: "4px 10px",
-    borderRadius: "12px",
-    fontSize: "12px",
-    fontWeight: "500",
-  },
-  teamActions: {
-    display: "flex",
-    gap: "10px",
-  },
-  editBtn: {
-    padding: "10px 20px",
-    background: "#6366f1",
-    color: "#fff",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "14px",
-  },
-  deleteBtn: {
-    padding: "10px 20px",
-    background: "#fff",
-    color: "#dc2626",
-    border: "1px solid #fecaca",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "14px",
-  },
-  // Grid
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(2, 1fr)",
-    gap: "20px",
-  },
-  card: {
-    background: "#fff",
-    borderRadius: "12px",
-    padding: "24px",
-    border: "1px solid #e2e8f0",
-  },
-  cardHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "20px",
-  },
-  cardTitle: {
-    fontSize: "16px",
-    fontWeight: "600",
-    color: "#1e293b",
-    margin: "0 0 16px 0",
-  },
-  // Invitation Code
-  invitationCodeContainer: {
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-    marginBottom: "12px",
-  },
-  invitationCode: {
-    flex: 1,
-    padding: "14px",
-    background: "#f8fafc",
-    borderRadius: "8px",
-    textAlign: "center",
-    fontSize: "20px",
-    fontWeight: "bold",
-    color: "#1e293b",
-    letterSpacing: "4px",
-    fontFamily: "monospace",
-  },
-  copyBtn: {
-    padding: "14px 20px",
-    background: "#6366f1",
-    color: "#fff",
-    border: "none",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontSize: "14px",
-  },
-  invitationHint: {
-    fontSize: "13px",
-    color: "#94a3b8",
-    margin: 0,
-  },
-  // Description
-  descriptionText: {
-    fontSize: "14px",
-    color: "#475569",
-    lineHeight: "1.6",
-    margin: 0,
-  },
-  // Members
-  addMemberBtn: {
-    padding: "8px 16px",
-    background: "#6366f1",
-    color: "#fff",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "13px",
-  },
-  membersList: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "12px",
-  },
-  memberCard: {
-    display: "flex",
-    alignItems: "center",
-    gap: "14px",
-    padding: "14px",
-    background: "#f8fafc",
-    borderRadius: "10px",
-  },
-  memberAvatar: {
-    width: "44px",
-    height: "44px",
-    background: "#e0e7ff",
-    color: "#4338ca",
-    borderRadius: "50%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "14px",
-    fontWeight: "600",
-  },
-  memberInfo: {
-    flex: 1,
-  },
-  memberName: {
-    fontSize: "14px",
-    fontWeight: "600",
-    color: "#1e293b",
-    margin: "0 0 2px 0",
-  },
-  youBadge: {
-    fontSize: "12px",
-    color: "#64748b",
-    fontWeight: "400",
-    marginLeft: "6px",
-  },
-  memberUsername: {
-    fontSize: "13px",
-    color: "#64748b",
-    margin: 0,
-  },
-  memberRole: {},
-  leaderBadge: {
-    padding: "4px 10px",
-    background: "#fef3c7",
-    color: "#92400e",
-    borderRadius: "12px",
-    fontSize: "12px",
-    fontWeight: "500",
-  },
-  memberBadge: {
-    padding: "4px 10px",
-    background: "#e0e7ff",
-    color: "#3730a3",
-    borderRadius: "12px",
-    fontSize: "12px",
-    fontWeight: "500",
-  },
-  memberActions: {
-    display: "flex",
-    gap: "8px",
-  },
-  actionBtn: {
-    padding: "6px 12px",
-    background: "#fff",
-    color: "#475569",
-    border: "1px solid #e2e8f0",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "12px",
-  },
-  removeBtn: {
-    padding: "6px 12px",
-    background: "#fff",
-    color: "#dc2626",
-    border: "1px solid #fecaca",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "12px",
-  },
-  // Leave Section
-  leaveSection: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  leaveTitle: {
-    fontSize: "15px",
-    fontWeight: "600",
-    color: "#1e293b",
-    margin: "0 0 4px 0",
-  },
-  leaveText: {
-    fontSize: "13px",
-    color: "#64748b",
-    margin: 0,
-  },
-  leaveBtn: {
-    padding: "10px 20px",
-    background: "#fff",
-    color: "#dc2626",
-    border: "1px solid #fecaca",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "14px",
-  },
-  // Modal
-  modalOverlay: {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: "rgba(0,0,0,0.4)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 1000,
-    padding: "20px",
-  },
-  modal: {
-    background: "#fff",
-    borderRadius: "16px",
-    maxWidth: "440px",
-    width: "100%",
-    maxHeight: "90vh",
-    overflow: "auto",
-  },
-  modalHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "20px 24px",
-    borderBottom: "1px solid #e2e8f0",
-  },
-  modalTitle: {
-    fontSize: "18px",
-    fontWeight: "600",
-    color: "#1e293b",
-    margin: 0,
-  },
-  modalClose: {
-    width: "32px",
-    height: "32px",
-    background: "#f1f5f9",
-    border: "none",
-    borderRadius: "50%",
-    color: "#64748b",
-    fontSize: "20px",
-    cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  modalBody: {
-    padding: "24px",
-  },
-  modalDescription: {
-    fontSize: "14px",
-    color: "#64748b",
-    marginBottom: "20px",
-    lineHeight: "1.5",
-  },
-  modalFooter: {
-    padding: "20px 24px",
-    borderTop: "1px solid #e2e8f0",
-    display: "flex",
-    gap: "12px",
-    justifyContent: "flex-end",
-  },
-  // Form
-  formGroup: {
-    marginBottom: "16px",
-  },
-  label: {
-    display: "block",
-    fontSize: "13px",
-    fontWeight: "500",
-    color: "#475569",
-    marginBottom: "6px",
-  },
-  input: {
-    width: "100%",
-    padding: "12px 14px",
-    background: "#f8fafc",
-    border: "1px solid #e2e8f0",
-    borderRadius: "8px",
-    color: "#1e293b",
-    fontSize: "14px",
-    outline: "none",
-    boxSizing: "border-box",
-  },
-  textarea: {
-    width: "100%",
-    padding: "12px 14px",
-    background: "#f8fafc",
-    border: "1px solid #e2e8f0",
-    borderRadius: "8px",
-    color: "#1e293b",
-    fontSize: "14px",
-    outline: "none",
-    resize: "vertical",
-    fontFamily: "inherit",
-    boxSizing: "border-box",
-  },
-  cancelBtn: {
-    padding: "12px 20px",
-    background: "#f1f5f9",
-    color: "#475569",
-    border: "1px solid #e2e8f0",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontSize: "14px",
-  },
-  submitBtn: {
-    padding: "12px 20px",
-    background: "#6366f1",
-    color: "#fff",
-    border: "none",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontSize: "14px",
-    fontWeight: "500",
-  },
 };
 
 export default Team;

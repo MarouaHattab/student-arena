@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { projectAPI } from "../api/projectApi";
-import { userAPI } from "../api/userApi";
+import api from "../api/axiosConfig";
 import Navbar from "../components/Navbar";
 
 const Projects = () => {
@@ -25,14 +24,14 @@ const Projects = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [projectsData, myProjectsData, profileData] = await Promise.all([
-        projectAPI.getProjects({ status: "active" }),
-        projectAPI.getMyProjects(),
-        userAPI.getProfile()
+      const [projectsRes, myProjectsRes, profileRes] = await Promise.all([
+        api.get('/projects?status=active'),
+        api.get('/projects/my-projects'),
+        api.get('/users/profile')
       ]);
-      setProjects(projectsData);
-      setMyProjects(myProjectsData.projects || []);
-      setProfile(profileData);
+      setProjects(projectsRes.data);
+      setMyProjects(myProjectsRes.data.projects || []);
+      setProfile(profileRes.data);
     } catch (err) {
       console.error("Error fetching data:", err);
     } finally {
@@ -43,9 +42,9 @@ const Projects = () => {
   const handleRegister = async (projectId) => {
     try {
       setRegistering(projectId);
-      await projectAPI.registerToProject(projectId);
+      await api.post(`/projects/${projectId}/register`);
       await fetchData();
-      alert("Inscription réussie !");
+      alert("Inscription réussie ! 🚀");
     } catch (err) {
       alert(err.response?.data?.message || "Erreur lors de l'inscription");
     } finally {
@@ -61,18 +60,7 @@ const Projects = () => {
     return new Date(date).toLocaleDateString("fr-FR", {
       day: "numeric",
       month: "short",
-      year: "numeric"
     });
-  };
-
-  const getStatusColor = (status) => {
-    const colors = {
-      draft: { bg: "#f1f5f9", color: "#475569" },
-      active: { bg: "#dcfce7", color: "#166534" },
-      completed: { bg: "#dbeafe", color: "#1e40af" },
-      archived: { bg: "#fee2e2", color: "#991b1b" }
-    };
-    return colors[status] || colors.draft;
   };
 
   const filteredProjects = projects.filter(p => {
@@ -81,428 +69,151 @@ const Projects = () => {
     return true;
   });
 
-  if (loading) {
-    return (
-      <div style={styles.container}>
-        <Navbar />
-        <div style={styles.loadingContainer}>
-          <div style={styles.spinner}></div>
-          <p style={styles.loadingText}>Chargement des projets...</p>
-        </div>
-        <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
-      </div>
-    );
-  }
+  if (loading) return <div className="loading-screen">Chargement de l'Arena...</div>;
 
   return (
-    <div style={styles.container}>
+    <div className="projects-page">
       <Navbar />
-      <main style={styles.main}>
-        {/* Header */}
-        <div style={styles.header}>
+      <main className="page-container">
+        <header className="section-header">
           <div>
-            <h1 style={styles.title}>Projets</h1>
-            <p style={styles.subtitle}>Découvrez et participez aux compétitions</p>
+            <h1 className="section-title">Catalogue des Projets</h1>
+            <p className="subtitle">Relevez les défis et gagnez des points pour votre équipe.</p>
           </div>
-          {profile?.role === "admin" && (
-            <button onClick={() => navigate("/admin/projects")} style={styles.adminBtn}>
-              Gérer les projets
-            </button>
-          )}
-        </div>
-
-        {/* Tabs */}
-        <div style={styles.tabs}>
-          <button
-            onClick={() => setActiveTab("all")}
-            style={{ ...styles.tab, ...(activeTab === "all" ? styles.tabActive : {}) }}
-          >
-            Tous les projets
-          </button>
-          <button
-            onClick={() => setActiveTab("my")}
-            style={{ ...styles.tab, ...(activeTab === "my" ? styles.tabActive : {}) }}
-          >
-            Mes projets ({myProjects.length})
-          </button>
-        </div>
+          <div className="header-actions">
+            <div className="tab-pill-container">
+                <button onClick={() => setActiveTab("all")} className={activeTab === 'all' ? 'active' : ''}>Exploration</button>
+                <button onClick={() => setActiveTab("my")} className={activeTab === 'my' ? 'active' : ''}>Mes Inscriptions</button>
+            </div>
+          </div>
+        </header>
 
         {activeTab === "all" && (
-          <>
-            {/* Filters */}
-            <div style={styles.filters}>
-              <select
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value)}
-                style={styles.select}
-              >
-                <option value="">Tous les types</option>
-                <option value="individual">Individuel</option>
-                <option value="team">Équipe</option>
-              </select>
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                style={styles.select}
-              >
-                <option value="">Tous les statuts</option>
-                <option value="active">Actif</option>
-                <option value="completed">Terminé</option>
-              </select>
-            </div>
-
-            {/* Projects Grid */}
-            <div style={styles.grid}>
-              {filteredProjects.length === 0 ? (
-                <div style={styles.emptyState}>
-                  <p>Aucun projet trouvé</p>
-                </div>
-              ) : (
-                filteredProjects.map((project) => (
-                  <div key={project._id} style={styles.card}>
-                    <div style={styles.cardHeader}>
-                      <span style={{
-                        ...styles.typeBadge,
-                        background: project.type === "team" ? "#e0e7ff" : "#fef3c7",
-                        color: project.type === "team" ? "#3730a3" : "#92400e"
-                      }}>
-                        {project.type === "team" ? "Équipe" : "Individuel"}
-                      </span>
-                      <span style={{
-                        ...styles.statusBadge,
-                        ...getStatusColor(project.status)
-                      }}>
-                        {project.status}
-                      </span>
-                    </div>
-                    <h3 style={styles.cardTitle}>{project.title}</h3>
-                    <p style={styles.cardDescription}>
-                      {project.description?.substring(0, 150)}
-                      {project.description?.length > 150 ? "..." : ""}
-                    </p>
-                    {project.tags?.length > 0 && (
-                      <div style={styles.tags}>
-                        {project.tags.slice(0, 4).map((tag, i) => (
-                          <span key={i} style={styles.tag}>{tag}</span>
-                        ))}
-                        {project.tags.length > 4 && (
-                          <span style={styles.tagMore}>+{project.tags.length - 4}</span>
-                        )}
-                      </div>
-                    )}
-                    <div style={styles.cardMeta}>
-                      <span>Date limite: {formatDate(project.endDate)}</span>
-                      <span>{project.participants?.length || 0} participants</span>
-                    </div>
-                    <div style={styles.cardPoints}>
-                      <span>1er: {project.firstPlacePoints}pts</span>
-                      <span>2e: {project.secondPlacePoints}pts</span>
-                      <span>3e: {project.thirdPlacePoints}pts</span>
-                    </div>
-                    <div style={styles.cardActions}>
-                      <button
-                        onClick={() => navigate(`/projects/${project._id}`)}
-                        style={styles.viewBtn}
-                      >
-                        Voir détails
-                      </button>
-                      {isRegistered(project._id) ? (
-                        <span style={styles.registeredBadge}>Inscrit</span>
-                      ) : (
-                        <button
-                          onClick={() => handleRegister(project._id)}
-                          style={styles.registerBtn}
-                          disabled={registering === project._id || project.status !== "active"}
-                        >
-                          {registering === project._id ? "..." : "S'inscrire"}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </>
-        )}
-
-        {activeTab === "my" && (
-          <div style={styles.grid}>
-            {myProjects.length === 0 ? (
-              <div style={styles.emptyState}>
-                <p>Vous n'êtes inscrit à aucun projet</p>
-                <button onClick={() => setActiveTab("all")} style={styles.primaryBtn}>
-                  Découvrir les projets
-                </button>
+          <div className="filter-shelf fade-in">
+              <div className="filter-group">
+                <label>Type de participation</label>
+                <select value={filterType} onChange={(e) => setFilterType(e.target.value)}>
+                    <option value="">Tous les types</option>
+                    <option value="individual">👤 Solo</option>
+                    <option value="team">👥 Team</option>
+                </select>
               </div>
-            ) : (
-              myProjects.map((project) => (
-                <div key={project._id} style={styles.card}>
-                  <div style={styles.cardHeader}>
-                    <span style={{
-                      ...styles.typeBadge,
-                      background: project.type === "team" ? "#e0e7ff" : "#fef3c7",
-                      color: project.type === "team" ? "#3730a3" : "#92400e"
-                    }}>
-                      {project.type === "team" ? "Équipe" : "Individuel"}
-                    </span>
-                    <span style={{
-                      ...styles.statusBadge,
-                      ...getStatusColor(project.status)
-                    }}>
-                      {project.status}
-                    </span>
-                  </div>
-                  <h3 style={styles.cardTitle}>{project.title}</h3>
-                  <p style={styles.cardDescription}>
-                    {project.description?.substring(0, 150)}
-                    {project.description?.length > 150 ? "..." : ""}
-                  </p>
-                  <div style={styles.cardMeta}>
-                    <span>Date limite: {formatDate(project.endDate)}</span>
-                  </div>
-                  <div style={styles.cardActions}>
-                    <button
-                      onClick={() => navigate(`/projects/${project._id}`)}
-                      style={styles.viewBtn}
-                    >
-                      Voir détails
-                    </button>
-                    <span style={styles.registeredBadge}>Inscrit</span>
-                  </div>
-                </div>
-              ))
-            )}
+              <div className="filter-group">
+                <label>État du projet</label>
+                <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+                    <option value="active">🟢 En cours</option>
+                    <option value="completed">🔵 Terminé</option>
+                </select>
+              </div>
           </div>
         )}
+
+        <div className="projects-grid fade-in">
+          {(activeTab === "all" ? filteredProjects : myProjects).map((project) => (
+            <div key={project._id} className="project-card card premium-shadow">
+              <div className="card-top">
+                <div className={`type-indicator ${project.type}`}>
+                    {project.type === 'team' ? 'TEAM' : 'SOLO'}
+                </div>
+                <div className="points-pool">
+                   🏆 {project.firstPlacePoints} pts
+                </div>
+              </div>
+              
+              <h3 className="project-title">{project.title}</h3>
+              <p className="project-desc">{project.description}</p>
+              
+              <div className="tag-cloud">
+                {project.tags?.map((tag, i) => (
+                    <span key={i} className="project-tag">#{tag}</span>
+                ))}
+              </div>
+
+              <div className="project-footer">
+                <div className="meta-info">
+                   <div className="meta-item">📅 Finit le {formatDate(project.endDate)}</div>
+                   <div className="meta-item">👥 {project.participants?.length || 0} inscrits</div>
+                </div>
+                
+                <div className="btn-row">
+                    <button onClick={() => navigate(`/projects/${project._id}`)} className="btn-outline">
+                        Explorer
+                    </button>
+                    {isRegistered(project._id) ? (
+                        <div className="registered-tag">✓ Inscrit</div>
+                    ) : (
+                        <button 
+                            onClick={() => handleRegister(project._id)} 
+                            className="btn-primary"
+                            disabled={registering === project._id || project.status !== 'active'}
+                        >
+                            {registering === project._id ? "..." : "Participer"}
+                        </button>
+                    )}
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {(activeTab === 'all' ? filteredProjects : myProjects).length === 0 && (
+              <div className="empty-projects">
+                  <div className="empty-icon">📂</div>
+                  <h3>Aucun projet ici</h3>
+                  <p>Repassez plus tard pour de nouveaux défis !</p>
+              </div>
+          )}
+        </div>
       </main>
+
+      <style>{`
+        .projects-page { min-height: 100vh; background: #f8fafc; }
+        .subtitle { color: #64748b; margin-top: 4px; }
+        
+        .tab-pill-container { display: flex; gap: 4px; background: #f1f5f9; padding: 4px; border-radius: 14px; }
+        .tab-pill-container button { padding: 8px 16px; border: none; background: transparent; border-radius: 10px; cursor: pointer; color: #64748b; font-weight: 700; font-size: 14px; transition: all 0.2s; }
+        .tab-pill-container button.active { background: #fff; color: #6366f1; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+ 
+        .filter-shelf { display: flex; gap: 24px; margin-bottom: 32px; background: #fff; padding: 20px; border-radius: 20px; border: 1px solid #e2e8f0; }
+        .filter-group { display: flex; flex-direction: column; gap: 6px; }
+        .filter-group label { font-size: 12px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
+        .filter-group select { padding: 10px; border-radius: 10px; border: 1px solid #e2e8f0; background: #f8fafc; font-weight: 600; outline: none; cursor: pointer; }
+ 
+        .projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 24px; }
+        
+        .project-card { display: flex; flex-direction: column; height: 100%; }
+        .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        
+        .type-indicator { padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; letter-spacing: 0.5px; }
+        .type-indicator.individual { background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; }
+        .type-indicator.team { background: #eef2ff; color: #4338ca; border: 1px solid #e0e7ff; }
+        
+        .points-pool { font-weight: 800; color: #10b981; font-size: 14px; }
+        
+        .project-title { font-size: 20px; font-weight: 800; color: #1e293b; margin-bottom: 8px; line-height: 1.3; }
+        .project-desc { font-size: 14px; color: #64748b; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 20px; flex: 1; }
+        
+        .tag-cloud { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 24px; }
+        .project-tag { padding: 4px 10px; background: #f1f5f9; color: #64748b; border-radius: 6px; font-size: 12px; font-weight: 600; }
+        
+        .project-footer { border-top: 1px solid #f1f5f9; padding-top: 20px; }
+        .meta-info { display: flex; justify-content: space-between; margin-bottom: 20px; }
+        .meta-item { font-size: 12px; font-weight: 600; color: #94a3b8; display: flex; align-items: center; gap: 4px; }
+        
+        .btn-row { display: flex; gap: 12px; }
+        .btn-outline { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff; color: #475569; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+        .btn-outline:hover { background: #f8fafc; border-color: #cbd5e1; }
+        
+        .btn-primary { flex: 1.5; height: 46px; }
+        
+        .registered-tag { flex: 1.5; display: flex; align-items: center; justify-content: center; background: #f0fdf4; color: #16a34a; font-weight: 800; border-radius: 12px; font-size: 14px; }
+ 
+        .empty-projects { grid-column: 1 / -1; padding: 100px 0; text-align: center; background: #fff; border-radius: 24px; border: 2px dashed #e2e8f0; }
+        .empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+        
+        .loading-screen { height: 100vh; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #6366f1; font-size: 1.25rem; background: #fff; }
+      `}</style>
     </div>
   );
-};
-
-const styles = {
-  container: {
-    minHeight: "100vh",
-    backgroundColor: "#f8fafc",
-  },
-  loadingContainer: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    height: "calc(100vh - 70px)",
-  },
-  spinner: {
-    width: "40px",
-    height: "40px",
-    border: "3px solid #e2e8f0",
-    borderTop: "3px solid #6366f1",
-    borderRadius: "50%",
-    animation: "spin 1s linear infinite",
-  },
-  loadingText: {
-    color: "#64748b",
-    marginTop: "16px",
-    fontSize: "16px",
-  },
-  main: {
-    maxWidth: "1200px",
-    margin: "0 auto",
-    padding: "32px 24px",
-  },
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "24px",
-  },
-  title: {
-    fontSize: "28px",
-    fontWeight: "bold",
-    color: "#1e293b",
-    margin: "0 0 4px 0",
-  },
-  subtitle: {
-    fontSize: "15px",
-    color: "#64748b",
-    margin: 0,
-  },
-  adminBtn: {
-    padding: "12px 24px",
-    background: "#1e293b",
-    color: "#fff",
-    border: "none",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontSize: "14px",
-    fontWeight: "500",
-  },
-  tabs: {
-    display: "flex",
-    gap: "8px",
-    marginBottom: "24px",
-    borderBottom: "1px solid #e2e8f0",
-    paddingBottom: "0",
-  },
-  tab: {
-    padding: "12px 20px",
-    background: "transparent",
-    color: "#64748b",
-    border: "none",
-    borderBottom: "2px solid transparent",
-    cursor: "pointer",
-    fontSize: "14px",
-    fontWeight: "500",
-    marginBottom: "-1px",
-  },
-  tabActive: {
-    color: "#6366f1",
-    borderBottom: "2px solid #6366f1",
-  },
-  filters: {
-    display: "flex",
-    gap: "12px",
-    marginBottom: "24px",
-  },
-  select: {
-    padding: "10px 16px",
-    background: "#fff",
-    border: "1px solid #e2e8f0",
-    borderRadius: "8px",
-    color: "#1e293b",
-    fontSize: "14px",
-    cursor: "pointer",
-  },
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
-    gap: "20px",
-  },
-  card: {
-    background: "#fff",
-    borderRadius: "12px",
-    padding: "24px",
-    border: "1px solid #e2e8f0",
-  },
-  cardHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    marginBottom: "12px",
-  },
-  typeBadge: {
-    padding: "4px 10px",
-    borderRadius: "12px",
-    fontSize: "12px",
-    fontWeight: "500",
-  },
-  statusBadge: {
-    padding: "4px 10px",
-    borderRadius: "12px",
-    fontSize: "12px",
-    fontWeight: "500",
-  },
-  cardTitle: {
-    fontSize: "18px",
-    fontWeight: "600",
-    color: "#1e293b",
-    margin: "0 0 8px 0",
-  },
-  cardDescription: {
-    fontSize: "14px",
-    color: "#64748b",
-    lineHeight: "1.5",
-    margin: "0 0 12px 0",
-  },
-  tags: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: "6px",
-    marginBottom: "12px",
-  },
-  tag: {
-    padding: "4px 10px",
-    background: "#f1f5f9",
-    color: "#475569",
-    borderRadius: "6px",
-    fontSize: "12px",
-  },
-  tagMore: {
-    padding: "4px 10px",
-    background: "#e0e7ff",
-    color: "#3730a3",
-    borderRadius: "6px",
-    fontSize: "12px",
-  },
-  cardMeta: {
-    display: "flex",
-    justifyContent: "space-between",
-    fontSize: "13px",
-    color: "#94a3b8",
-    marginBottom: "12px",
-  },
-  cardPoints: {
-    display: "flex",
-    gap: "12px",
-    fontSize: "12px",
-    color: "#64748b",
-    marginBottom: "16px",
-    padding: "10px",
-    background: "#f8fafc",
-    borderRadius: "8px",
-  },
-  cardActions: {
-    display: "flex",
-    gap: "10px",
-  },
-  viewBtn: {
-    flex: 1,
-    padding: "10px",
-    background: "#f1f5f9",
-    color: "#475569",
-    border: "1px solid #e2e8f0",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontSize: "14px",
-  },
-  registerBtn: {
-    flex: 1,
-    padding: "10px",
-    background: "#6366f1",
-    color: "#fff",
-    border: "none",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontSize: "14px",
-    fontWeight: "500",
-  },
-  registeredBadge: {
-    flex: 1,
-    padding: "10px",
-    background: "#dcfce7",
-    color: "#166534",
-    borderRadius: "8px",
-    fontSize: "14px",
-    fontWeight: "500",
-    textAlign: "center",
-  },
-  emptyState: {
-    gridColumn: "1 / -1",
-    textAlign: "center",
-    padding: "60px 20px",
-    background: "#fff",
-    borderRadius: "12px",
-    border: "1px solid #e2e8f0",
-    color: "#64748b",
-  },
-  primaryBtn: {
-    marginTop: "16px",
-    padding: "12px 24px",
-    background: "#6366f1",
-    color: "#fff",
-    border: "none",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontSize: "14px",
-  },
 };
 
 export default Projects;

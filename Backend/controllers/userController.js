@@ -54,6 +54,7 @@ const getUsers = async (req, res) => {
     const users = await User.find()
       .select('-password')
       .populate('team', 'name')
+      .populate('registeredProjects', 'title')
       .sort({ createdAt: -1 });
 
     res.json(users);
@@ -118,7 +119,8 @@ const updateUser = async (req, res) => {
       email: user.email,
       userName: user.userName,
       bio: user.bio,
-      role: user.role
+      role: user.role,
+      createdAt: user.createdAt
     });
   } catch (error) {
     console.error(error);
@@ -226,6 +228,50 @@ const patchUser = async (req, res) => {
   }
 };
 
+// @desc    Créer un utilisateur (Admin)
+// @route   POST /api/users
+// @access  Private/Admin
+const adminCreateUser = async (req, res) => {
+  try {
+    const { firstName, lastName, email, password, userName, role } = req.body;
+
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res.status(400).json({ message: 'Cet email est déjà utilisé' });
+    }
+
+    const userNameExists = await User.findOne({ userName });
+    if (userNameExists) {
+      return res.status(400).json({ message: 'Ce nom d\'utilisateur est déjà pris' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await User.create({
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+      userName,
+      role: role || 'user',
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
+
+    res.status(201).json({
+      _id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      userName: user.userName,
+      role: user.role
+    });
+  } catch (error) {
+    console.error('Erreur adminCreateUser:', error);
+    res.status(500).json({ message: 'Erreur serveur', error: error.message });
+  }
+};
+
 module.exports = {
   getProfile,
   getUsers,
@@ -234,5 +280,6 @@ module.exports = {
   patchUser,
   deleteUser,
   changePassword,
-  getUsersLeaderboard
+  getUsersLeaderboard,
+  adminCreateUser
 };

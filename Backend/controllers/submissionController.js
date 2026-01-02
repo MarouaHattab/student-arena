@@ -441,8 +441,8 @@ const addPoints = async (req, res) => {
     const { userId, teamId, points, reason } = req.body;
 
     // Validation
-    if (!points || points <= 0) {
-      return res.status(400).json({ message: 'Le nombre de points doit être supérieur à 0' });
+    if (!points || points === 0) {
+      return res.status(400).json({ message: 'Le nombre de points ne peut pas être 0' });
     }
 
     if (!userId && !teamId) {

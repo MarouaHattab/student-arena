@@ -513,55 +513,7 @@ Réponds en JSON:
   }
 };
 
-// @desc    Générer un feedback détaillé pour une équipe
-// @route   POST /api/ai/team-feedback
-// @access  Private (Admin)
-const generateTeamFeedback = async (req, res) => {
-  try {
-    const { teamName, submissions, projectTitle } = req.body;
 
-    const model = getModel();
-    const prompt = `Tu es un mentor expert en évaluation d'équipes de projet.
-
-Équipe: ${teamName}
-Projet: ${projectTitle}
-Soumissions de l'équipe: ${JSON.stringify(submissions, null, 2)}
-
-Génère un feedback constructif et détaillé:
-1. Évaluation globale de l'équipe
-2. Points forts de la collaboration
-3. Axes d'amélioration
-4. Conseils pour les prochains projets
-5. Score de performance équipe (sur 100)
-
-Réponds en JSON:
-{
-  "overallAssessment": "...",
-  "teamStrengths": ["..."],
-  "areasForImprovement": ["..."],
-  "recommendations": ["..."],
-  "teamScore": 0
-}`;
-
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
-
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      const feedback = JSON.parse(jsonMatch[0]);
-      return res.json({ 
-        success: true,
-        feedback 
-      });
-    }
-
-    res.status(500).json({ message: 'Erreur lors de la génération du feedback' });
-  } catch (error) {
-    console.error('Erreur generateTeamFeedback:', error);
-    res.status(500).json({ message: 'Erreur serveur', error: error.message });
-  }
-};
 
 module.exports = {
   // Projet
@@ -579,5 +531,5 @@ module.exports = {
   generateUserSummary,
   // Génération de contenu
   generateProjectIdea,
-  generateTeamFeedback
+
 };

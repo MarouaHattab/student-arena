@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { userAPI, aiAPI } from "../api/userApi";
+import api from "../api/axiosConfig";
 import Navbar from "../components/Navbar";
 
 const Profile = () => {
@@ -30,6 +30,15 @@ const Profile = () => {
   });
   const [isSaving, setIsSaving] = useState(false);
 
+  // Password change state
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: ""
+  });
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+
   useEffect(() => {
     fetchProfile();
   }, []);
@@ -37,7 +46,8 @@ const Profile = () => {
   const fetchProfile = async () => {
     try {
       setLoading(true);
-      const data = await userAPI.getProfile();
+      const res = await api.get('/users/profile');
+      const data = res.data;
       setProfile(data);
       setEditData({
         firstName: data.firstName || "",
@@ -57,13 +67,14 @@ const Profile = () => {
   const handleGenerateBio = async () => {
     try {
       setIsGeneratingBio(true);
-      const response = await aiAPI.generateBio({
+      const res = await api.post('/ai/generate-bio', {
         firstName: profile?.firstName,
         lastName: profile?.lastName,
         skills: bioFormData.skills,
         interests: bioFormData.interests,
         experience: bioFormData.experience
       });
+      const response = res.data;
       setGeneratedBio(response.bio);
     } catch (err) {
       alert("Erreur lors de la génération de la bio: " + (err.response?.data?.message || err.message));
@@ -75,7 +86,7 @@ const Profile = () => {
   const handleApplyGeneratedBio = async () => {
     try {
       setIsSaving(true);
-      await userAPI.patchProfile(profile._id, { bio: generatedBio });
+      await api.patch(`/users/${profile._id}`, { bio: generatedBio });
       setProfile({ ...profile, bio: generatedBio });
       setEditData({ ...editData, bio: generatedBio });
       setShowBioModal(false);
@@ -91,13 +102,37 @@ const Profile = () => {
   const handleSaveProfile = async () => {
     try {
       setIsSaving(true);
-      const updatedProfile = await userAPI.updateProfile(profile._id, editData);
+      const res = await api.put(`/users/${profile._id}`, editData);
+      const updatedProfile = res.data;
       setProfile({ ...profile, ...updatedProfile });
       setIsEditing(false);
     } catch (err) {
       alert("Erreur lors de la sauvegarde: " + (err.response?.data?.message || err.message));
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      alert("Les nouveaux mots de passe ne correspondent pas");
+      return;
+    }
+
+    try {
+      setIsChangingPassword(true);
+      await api.put(`/users/${profile._id}/password`, {
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword
+      });
+      alert("Mot de passe mis à jour avec succès !");
+      setShowPasswordModal(false);
+      setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+    } catch (err) {
+      alert(err.response?.data?.message || "Erreur lors du changement de mot de passe");
+    } finally {
+      setIsChangingPassword(false);
     }
   };
 
@@ -240,6 +275,12 @@ const Profile = () => {
                       {profile?.role === "admin" ? "Administrateur" : "Utilisateur"}
                     </span>
                   </div>
+                  <button 
+                    onClick={() => setShowPasswordModal(true)} 
+                    style={styles.passwordBtn}
+                  >
+                    Changer le mot de passe
+                  </button>
                 </>
               )}
             </div>
@@ -270,7 +311,7 @@ const Profile = () => {
                 <div style={styles.noTeam}>
                   <div style={styles.noTeamIcon}>?</div>
                   <p style={styles.noTeamText}>Vous n'êtes membre d'aucune équipe</p>
-                  <button style={styles.joinTeamBtn}>Rejoindre une équipe</button>
+                  <button onClick={() => navigate("/team")} style={styles.joinTeamBtn}>Rejoindre une équipe</button>
                 </div>
               )}
             </div>
@@ -405,6 +446,58 @@ const Profile = () => {
                 </>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Password Change Modal */}
+      {showPasswordModal && (
+        <div style={styles.modalOverlay} onClick={() => setShowPasswordModal(false)}>
+          <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <div style={styles.modalHeader}>
+              <h2 style={styles.modalTitle}>Changer le mot de passe</h2>
+              <button onClick={() => setShowPasswordModal(false)} style={styles.modalClose}>×</button>
+            </div>
+            <form onSubmit={handlePasswordChange}>
+              <div style={styles.modalBody}>
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>Mot de passe actuel</label>
+                  <input
+                    type="password"
+                    value={passwordData.currentPassword}
+                    onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                    style={styles.input}
+                    required
+                  />
+                </div>
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>Nouveau mot de passe</label>
+                  <input
+                    type="password"
+                    value={passwordData.newPassword}
+                    onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                    style={styles.input}
+                    required
+                  />
+                </div>
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>Confirmer le nouveau mot de passe</label>
+                  <input
+                    type="password"
+                    value={passwordData.confirmPassword}
+                    onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                    style={styles.input}
+                    required
+                  />
+                </div>
+              </div>
+              <div style={styles.modalFooter}>
+                <button type="button" onClick={() => setShowPasswordModal(false)} style={styles.cancelBtn}>Annuler</button>
+                <button type="submit" style={styles.saveBtn} disabled={isChangingPassword}>
+                  {isChangingPassword ? "En cours..." : "Mettre à jour"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
@@ -568,6 +661,18 @@ const styles = {
     fontSize: "14px",
     fontWeight: "500",
     transition: "all 0.2s ease",
+  },
+  passwordBtn: {
+    marginTop: "20px",
+    padding: "10px 16px",
+    background: "#fff",
+    color: "#6366f1",
+    border: "1px solid #6366f1",
+    borderRadius: "8px",
+    cursor: "pointer",
+    fontSize: "13px",
+    fontWeight: "600",
+    transition: "all 0.2s",
   },
   editActions: {
     display: "flex",
