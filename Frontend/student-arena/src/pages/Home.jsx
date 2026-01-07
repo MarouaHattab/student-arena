@@ -14,7 +14,6 @@ const Home = () => {
   const [profile, setProfile] = useState(user);
 
   useEffect(() => {
-    fetchRecommendations();
     fetchProfile();
   }, []);
 
@@ -202,12 +201,6 @@ const Home = () => {
             <div style={styles.infoCol}>
               <span style={styles.infoLabelLite}>Email</span>
               <span style={styles.infoValueLite}>{user?.email}</span>
-            </div>
-            <div style={styles.infoCol}>
-              <span style={styles.infoLabelLite}>Membre depuis</span>
-              <span style={styles.infoValueLite}>
-                {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Non spécifié'}
-              </span>
             </div>
           </div>
         </div>

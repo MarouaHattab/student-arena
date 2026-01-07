@@ -3,11 +3,10 @@ const Project = require('../models/Project');
 const User = require('../models/User');
 const Submission = require('../models/Submission');
 
-// ==================== PROJET AI FEATURES ====================
+// *********** projet AI features ***********
 
-// @desc    Générer des tags à partir de la description d'un projet
-// @route   POST /api/ai/generate-tags
-// @access  Private
+// Generate tags from a project description
+// POST /api/ai/generate-tags
 const generateProjectTags = async (req, res) => {
   try {
     const { description, title } = req.body;
@@ -17,13 +16,13 @@ const generateProjectTags = async (req, res) => {
     }
 
     const model = getModel();
-    const prompt = `Analyse cette description de projet et génère entre 3 et 7 tags pertinents.
+    const prompt = `analyse cette description de projet et genere entre 3 et 7 tags pertinents.
     
-Titre: ${title || 'Non spécifié'}
-Description: ${description}
+titre: ${title || 'Non specifie'}
+description: ${description}
 
-Réponds UNIQUEMENT avec un tableau JSON de tags (en minuscules, sans espaces, utilisez des tirets si nécessaire).
-Exemple de format: ["web-development", "react", "api", "database"]
+reponds UNIQUEMENT avec un tableau JSON de tags (en minuscules, sans espaces, utilisez des tirets si nécessaire).
+exemple de format: ["web-development", "react", "api", "database"]
 
 Tags:`;
 
@@ -37,20 +36,19 @@ Tags:`;
       const tags = JSON.parse(jsonMatch[0]);
       return res.json({ 
         success: true,
-        tags: tags.slice(0, 7) // Maximum 7 tags
+        tags: tags.slice(0, 7) // max 7 tags
       });
     }
 
-    res.status(500).json({ message: 'Erreur lors de la génération des tags' });
+    res.status(500).json({ message: 'Erreur lors de la generation des tags' });
   } catch (error) {
     console.error('Erreur generateProjectTags:', error);
     res.status(500).json({ message: 'Erreur serveur', error: error.message });
   }
 };
 
-// @desc    Reformuler/Améliorer la description d'un projet
-// @route   POST /api/ai/improve-description
-// @access  Private
+// reformule ou ameliorer la description d'un projet
+//POST /api/ai/improve-description
 const improveProjectDescription = async (req, res) => {
   try {
     const { description, title, style } = req.body;
@@ -99,9 +97,8 @@ Description améliorée:`;
   }
 };
 
-// @desc    Générer des critères de succès pour un projet
-// @route   POST /api/ai/generate-criteria
-// @access  Private
+// generate success criteria
+//POST /api/ai/generate-criteria
 const generateSuccessCriteria = async (req, res) => {
   try {
     const { description, title, type } = req.body;
@@ -141,11 +138,8 @@ Réponds UNIQUEMENT avec les critères, un par ligne:`;
   }
 };
 
-// ==================== USER AI FEATURES ====================
-
-// @desc    Générer une bio utilisateur
-// @route   POST /api/ai/generate-bio
-// @access  Private
+// generate user bio
+//POST /api/ai/generate-bio
 const generateUserBio = async (req, res) => {
   try {
     const { firstName, lastName, skills, interests, experience } = req.body;
@@ -182,16 +176,15 @@ Bio:`;
   }
 };
 
-// ==================== RECOMMANDATIONS AI ====================
+// **** RECOMMANDATIONS AI*****
 
-// @desc    Recommander des projets personnalisés pour un utilisateur
-// @route   GET /api/ai/recommend-projects
-// @access  Private
+// recommend projects
+//GET /api/ai/recommend-projects
 const recommendProjects = async (req, res) => {
   try {
     const userId = req.user._id;
     
-    // Récupérer l'utilisateur et ses projets passés
+    // recuperer l'utilisateur et ses projets passés
     const user = await User.findById(userId).populate('registeredProjects');
     const activeProjects = await Project.find({ 
       status: 'active',
@@ -206,7 +199,7 @@ const recommendProjects = async (req, res) => {
       });
     }
 
-    // Préparer les données pour l'IA
+    // preparer les données pour l'IA
     const userHistory = user.registeredProjects.map(p => ({
       title: p.title,
       tags: p.tags
@@ -272,11 +265,10 @@ Recommandations:`;
 };
 
 
-// ==================== CHATBOT AI ====================
+// **** CHATBOT AI*****
 
-// @desc    Chatbot d'assistance
-// @route   POST /api/ai/chat
-// @access  Private
+// chat assistant
+//POST /api/ai/chat
 const chatAssistant = async (req, res) => {
   try {
     const { message, conversationHistory } = req.body;
@@ -321,11 +313,10 @@ Réponds de manière concise, amicale et utile. Si tu ne sais pas quelque chose,
   }
 };
 
-// ==================== RÉSUMÉS INTELLIGENTS ====================
+// **** RESUMES INTELLIGENTS*****
 
-// @desc    Générer un résumé intelligent d'un projet
-// @route   GET /api/ai/project-summary/:projectId
-// @access  Private
+// generate project summary
+//GET /api/ai/project-summary/:projectId
 const generateProjectSummary = async (req, res) => {
   try {
     const { projectId } = req.params;
@@ -389,9 +380,8 @@ Réponds en JSON:
   }
 };
 
-// @desc    Générer un résumé du profil utilisateur avec statistiques
-// @route   GET /api/ai/user-summary/:userId
-// @access  Private
+// generate user summary
+//GET /api/ai/user-summary/:userId
 const generateUserSummary = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -457,11 +447,10 @@ Réponds en JSON:
   }
 };
 
-// ==================== GÉNÉRATION DE CONTENU ====================
+// **** GÉNÉRATION DE CONTENU*****
 
-// @desc    Générer une idée de projet
-// @route   POST /api/ai/generate-project-idea
-// @access  Private
+// generate project idea
+//POST /api/ai/generate-project-idea
 const generateProjectIdea = async (req, res) => {
   try {
     const { theme, difficulty, type } = req.body;

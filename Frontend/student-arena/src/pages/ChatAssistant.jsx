@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import api from "../api/axiosConfig";
 import Navbar from "../components/Navbar";
@@ -13,10 +13,12 @@ const ChatAssistant = () => {
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const messagesEnd = document.getElementById("messages-end");
+    if (messagesEnd) {
+      messagesEnd.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   useEffect(() => {
@@ -100,7 +102,7 @@ const ChatAssistant = () => {
                 </div>
               </div>
             )}
-            <div ref={messagesEndRef} />
+            <div id="messages-end" />
           </div>
 
           <form onSubmit={handleSend} style={styles.inputArea}>
@@ -131,7 +133,7 @@ const ChatAssistant = () => {
           background: #64748b;
           border-radius: 50%;
           margin: 0 2px;
-          animation: typing 1s infinite ease-in-out;
+          
         }
         .typing span:nth-child(2) { animation-delay: 0.2s; }
         .typing span:nth-child(3) { animation-delay: 0.4s; }

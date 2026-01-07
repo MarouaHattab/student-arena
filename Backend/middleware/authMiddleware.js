@@ -21,21 +21,21 @@ const protect = async (req, res, next) => {
         }
     }
 
-    return res.status(401).json({ message: 'Pas de token, accès refusé' });
+    return res.status(401).json({ message: 'Pas de token, acces refuse' });
 };
 
 const admin = (req, res, next) => {
     if (req.user && req.user.role === 'admin') {
         return next();
     }
-    return res.status(403).json({ message: 'Accès refusé, admin requis' });
+    return res.status(403).json({ message: 'Acces refuse, admin requis' });
 };
 
 const teamLeader = (req, res, next) => {
     if (req.user && req.user.isTeamLeader) {
         return next();
     }
-    return res.status(403).json({ message: 'Accès refusé, leader d\'équipe requis' });
+    return res.status(403).json({ message: 'Acces refuse, leader d\'equipe requis' });
 };
 
 module.exports = { protect, admin, teamLeader };

@@ -12,7 +12,7 @@ const {
 
   // Chatbot
   chatAssistant,
-  // Résumés
+  // Resumes
   generateProjectSummary,
   generateUserSummary,
   // Génération de contenu
@@ -20,37 +20,37 @@ const {
 } = require('../controllers/aiController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
-// ==================== ROUTES PROJET ====================
-// Générer des tags à partir d'une description
+// ******routes projet ******
+// Generate tags from a description
 router.post('/generate-tags', protect, generateProjectTags);
 
-// Améliorer/reformuler une description de projet
+// Improve/rewrite a project description
 router.post('/improve-description', protect, improveProjectDescription);
 
-// Générer des critères de succès
+// Generate success criteria
 router.post('/generate-criteria', protect, generateSuccessCriteria);
 
-// ==================== ROUTES USER ====================
-// Générer une bio utilisateur
+// ******routes user ******
+// Generate user bio
 router.post('/generate-bio', protect, generateUserBio);
 
-// ==================== ROUTES RECOMMANDATIONS ====================
-// Obtenir des recommandations de projets personnalisées
+// ******routes recommandations ******
+// Get personalized project recommendations
 router.get('/recommend-projects', protect, recommendProjects);
 
-// ==================== ROUTES CHATBOT ====================
-// Chatbot d'assistance
+// ******routes chatbot ******
+// Chatbot assistant
 router.post('/chat', protect, chatAssistant);
 
-// ==================== ROUTES RÉSUMÉS ====================
-// Résumé intelligent d'un projet
+// ******routes resume ******
+// Intelligent project summary
 router.get('/project-summary/:projectId', protect, generateProjectSummary);
 
-// Résumé du profil utilisateur
+// User profile summary
 router.get('/user-summary/:userId', protect, generateUserSummary);
 
-// ==================== ROUTES GÉNÉRATION DE CONTENU ====================
-// Générer une idée de projet
+// ******routes generation ******
+// Generate project idea
 router.post('/generate-project-idea', protect, generateProjectIdea);
 
 module.exports = router;

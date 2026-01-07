@@ -16,15 +16,15 @@ const {
 const { protect, admin } = require('../middleware/authMiddleware');
 const { validateCreateProject, validateUpdateProject, validateMongoId } = require('../middleware/validationMiddleware');
 
-// Routes publiques
+// ******routes project ******
 router.get('/', getProjects);
 router.get('/active', getActiveProjects);
 
-// Routes protégées - Routes spécifiques AVANT les routes avec :id
+// Routes proteges - Routes specifiques AVANT les routes avec :id
 router.get('/my-projects', protect, getUserProjects);
 router.get('/team-projects', protect, getTeamProjects);
 
-// Routes avec :id (après les routes spécifiques)
+// Routes avec :id (apres les routes specifiques)
 router.get('/:id/participants', validateMongoId, getProjectParticipants);
 router.get('/:id', validateMongoId, getProjectById);
 router.post('/', protect, admin, validateCreateProject, createProject);

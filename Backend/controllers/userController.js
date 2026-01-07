@@ -1,11 +1,12 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 
-// @desc    Récupérer le profil de l'utilisateur connecté
-// @route   GET /api/users/profile
-// @access  Private
+// Get user profile
+// GET /api/users/profile
+// Private
 const getProfile = async (req, res) => {
   try {
+    const Team = require('../models/Team');
     const user = await User.findById(req.user._id)
       .select('-password')
       .populate('team', 'name description')
@@ -16,7 +17,29 @@ const getProfile = async (req, res) => {
       return res.status(404).json({ message: 'Utilisateur non trouvé' });
     }
 
-    // Construire la réponse avec les données de profil complètes
+    // Vérifier si l'utilisateur a une référence d'équipe et si cette équipe existe vraiment
+    let teamData = null;
+    if (user.team) {
+      // Si populate a retourné null mais que user.team (ID) existe, vérifier si l'équipe existe
+      const teamExists = await Team.findById(user.team._id || user.team);
+      if (teamExists) {
+        teamData = {
+          _id: teamExists._id,
+          name: teamExists.name,
+          description: teamExists.description
+        };
+      } else {
+        // Nettoyer la référence orpheline
+        await User.findByIdAndUpdate(user._id, {
+          $unset: { team: 1 },
+          isTeamLeader: false
+        });
+        user.team = null;
+        user.isTeamLeader = false;
+      }
+    }
+
+    // Build response with complete profile data
     const profileData = {
       _id: user._id,
       firstName: user.firstName,
@@ -26,12 +49,8 @@ const getProfile = async (req, res) => {
       bio: user.bio || '',
       points: user.points || 0,
       role: user.role,
-      team: user.team ? {
-        _id: user.team._id,
-        name: user.team.name,
-        description: user.team.description
-      } : null,
-      isTeamLeader: user.isTeamLeader,
+      team: teamData,
+      isTeamLeader: user.isTeamLeader || false,
       submissionsCount: user.submissions?.length || 0,
       registeredProjectsCount: user.registeredProjects?.length || 0,
       registeredProjects: user.registeredProjects,
@@ -46,9 +65,9 @@ const getProfile = async (req, res) => {
   }
 };
 
-// @desc    Récupérer tous les utilisateurs
-// @route   GET /api/users
-// @access  Private/Admin
+// Get all users
+// GET /api/users
+// Private/Admin
 const getUsers = async (req, res) => {
   try {
     const users = await User.find()
@@ -64,9 +83,9 @@ const getUsers = async (req, res) => {
   }
 };
 
-// @desc    Récupérer un utilisateur par ID
-// @route   GET /api/users/:id
-// @access  Private
+// Get user by ID
+// GET /api/users/:id
+// Private
 const getUserById = async (req, res) => {
   try {
     const user = await User.findById(req.params.id)
@@ -86,9 +105,9 @@ const getUserById = async (req, res) => {
   }
 };
 
-// @desc    Mettre à jour un utilisateur
-// @route   PUT /api/users/:id
-// @access  Private
+// Update user
+// PUT /api/users/:id
+// Private
 const updateUser = async (req, res) => {
   try {
     const { firstName, lastName, userName, bio } = req.body;
@@ -128,9 +147,9 @@ const updateUser = async (req, res) => {
   }
 };
 
-// @desc    Supprimer un utilisateur
-// @route   DELETE /api/users/:id
-// @access  Private/Admin
+// Delete user
+// DELETE /api/users/:id
+// Private/Admin
 const deleteUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -147,9 +166,9 @@ const deleteUser = async (req, res) => {
   }
 };
 
-// @desc    Changer le mot de passe
-// @route   PUT /api/users/:id/password
-// @access  Private
+// Change password
+// PUT /api/users/:id/password
+// Private
 const changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
@@ -183,9 +202,9 @@ const changePassword = async (req, res) => {
   }
 };
 
-// @desc    Obtenir le classement des utilisateurs
-// @route   GET /api/users/leaderboard
-// @access  Public
+// Get users leaderboard
+// GET /api/users/leaderboard
+// Public
 const getUsersLeaderboard = async (req, res) => {
   try {
     const users = await User.find()
@@ -200,12 +219,12 @@ const getUsersLeaderboard = async (req, res) => {
   }
 };
 
-// @desc    Mettre à jour partiellement un utilisateur (PATCH)
-// @route   PATCH /api/users/:id
-// @access  Private
+// Update user partially
+// PATCH /api/users/:id
+// Private
 const patchUser = async (req, res) => {
   try {
-    // Vérifier les permissions
+    // Check permissions
     if (req.user._id.toString() !== req.params.id && req.user.role !== 'admin') {
       return res.status(403).json({ message: 'Non autorisé' });
     }
@@ -228,9 +247,9 @@ const patchUser = async (req, res) => {
   }
 };
 
-// @desc    Créer un utilisateur (Admin)
-// @route   POST /api/users
-// @access  Private/Admin
+// Create user (Admin)
+// POST /api/users
+// Private/Admin
 const adminCreateUser = async (req, res) => {
   try {
     const { firstName, lastName, email, password, userName, role } = req.body;

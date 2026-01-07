@@ -1,36 +1,52 @@
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import api from "../api/axiosConfig";
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { logout, user } = useAuth();
   const [showAdminMenu, setShowAdminMenu] = useState(false);
-  const adminMenuRef = useRef(null);
+  const [currentPath, setCurrentPath] = useState(window.location.pathname);
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (adminMenuRef.current && !adminMenuRef.current.contains(event.target)) {
-        setShowAdminMenu(false);
-      }
+    // Mettre à jour le chemin actuel quand on navigue
+    const handleLocationChange = () => {
+      setCurrentPath(window.location.pathname);
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+
+    window.addEventListener("popstate", handleLocationChange);
+    
+    // Une petite astuce pour intercepter les changements de navigation interne
+    // sans useLocation
+    const interval = setInterval(() => {
+      if (window.location.pathname !== currentPath) {
+        setCurrentPath(window.location.pathname);
+      }
+    }, 100);
+
+    return () => {
+      window.removeEventListener("popstate", handleLocationChange);
+      clearInterval(interval);
+    };
+  }, [currentPath]);
+
+  const handleNavigate = (path) => {
+    navigate(path);
+    setCurrentPath(path);
+  };
 
   const handleLogout = async () => {
     await logout();
     navigate("/login");
   };
 
-  const isActive = (path) => location.pathname === path;
+  const isActive = (path) => currentPath === path;
 
   return (
     <header style={styles.header}>
       <div style={styles.headerContent}>
-        <div style={styles.brand} onClick={() => navigate("/")}>
+        <div style={styles.brand} onClick={() => handleNavigate("/")}>
           <div style={styles.logoBadge}>SA</div>
           <h1 style={styles.logoText}>Student Arena</h1>
         </div>
@@ -38,25 +54,25 @@ const Navbar = () => {
         <nav style={styles.nav}>
           <div style={styles.mainNav}>
             <button 
-              onClick={() => navigate("/")} 
+              onClick={() => handleNavigate("/")} 
               style={{...styles.navBtn, ...(isActive("/") ? styles.navBtnActive : {})}}
             >
               Accueil
             </button>
             <button 
-              onClick={() => navigate("/projects")} 
-              style={{...styles.navBtn, ...(location.pathname.startsWith("/projects") ? styles.navBtnActive : {})}}
+              onClick={() => handleNavigate("/projects")} 
+              style={{...styles.navBtn, ...(currentPath.startsWith("/projects") ? styles.navBtnActive : {})}}
             >
               Projets
             </button>
             <button 
-              onClick={() => navigate("/leaderboard")} 
+              onClick={() => handleNavigate("/leaderboard")} 
               style={{...styles.navBtn, ...(isActive("/leaderboard") ? styles.navBtnActive : {})}}
             >
               Classement
             </button>
             <button 
-              onClick={() => navigate("/team")} 
+              onClick={() => handleNavigate("/team")} 
               style={{...styles.navBtn, ...(isActive("/team") ? styles.navBtnActive : {})}}
             >
               Équipe
@@ -65,13 +81,13 @@ const Navbar = () => {
             <div style={styles.divider} />
 
             <button 
-              onClick={() => navigate("/ai/chat")} 
+              onClick={() => handleNavigate("/ai/chat")} 
               style={{...styles.aiBtn, ...(isActive("/ai/chat") ? styles.aiBtnActive : {})}}
             >
               ✨ Assistant
             </button>
             <button 
-              onClick={() => navigate("/ai/generate-idea")} 
+              onClick={() => handleNavigate("/ai/generate-idea")} 
               style={{...styles.aiBtn, ...(isActive("/ai/generate-idea") ? styles.aiBtnActive : {})}}
             >
               💡 Idées
@@ -80,7 +96,13 @@ const Navbar = () => {
 
           <div style={styles.userActions}>
             {user?.role === 'admin' && (
-              <div style={styles.adminDropdown} ref={adminMenuRef}>
+              <div style={styles.adminDropdown}>
+                {showAdminMenu && (
+                  <div 
+                    style={styles.backdrop} 
+                    onClick={() => setShowAdminMenu(false)} 
+                  />
+                )}
                 <button 
                   onClick={() => setShowAdminMenu(!showAdminMenu)}
                   style={{
@@ -93,13 +115,13 @@ const Navbar = () => {
                 {showAdminMenu && (
                   <div style={styles.dropdownMenu}>
                     <div style={styles.dropdownHeader}>Gestion</div>
-                    <button onClick={() => { navigate("/admin/projects"); setShowAdminMenu(false); }} style={styles.dropdownItem}>
+                    <button onClick={() => { handleNavigate("/admin/projects"); setShowAdminMenu(false); }} style={styles.dropdownItem}>
                          Gérer Projets
                     </button>
-                    <button onClick={() => { navigate("/admin/users"); setShowAdminMenu(false); }} style={styles.dropdownItem}>
+                    <button onClick={() => { handleNavigate("/admin/users"); setShowAdminMenu(false); }} style={styles.dropdownItem}>
                         Utilisateurs
                     </button>
-                    <button onClick={() => { navigate("/admin/teams"); setShowAdminMenu(false); }} style={styles.dropdownItem}>
+                    <button onClick={() => { handleNavigate("/admin/teams"); setShowAdminMenu(false); }} style={styles.dropdownItem}>
                          Équipes
                     </button>
                   </div>
@@ -109,7 +131,7 @@ const Navbar = () => {
             
             <div 
               style={styles.profileIndicator}
-              onClick={() => navigate("/profile")}
+              onClick={() => handleNavigate("/profile")}
             >
               <div style={styles.avatar}>
                 {user?.userName?.charAt(0).toUpperCase() || 'U'}
@@ -236,6 +258,16 @@ const styles = {
   },
   adminDropdown: {
     position: "relative",
+    zIndex: 1002,
+  },
+  backdrop: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: "transparent",
+    zIndex: 1000,
   },
   adminMenuBtn: {
     padding: "8px 16px",

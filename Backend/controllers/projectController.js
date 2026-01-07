@@ -2,9 +2,9 @@ const Project = require('../models/Project');
 const User = require('../models/User');
 const Team = require('../models/Team');
 
-// @desc    Créer un projet
-// @route   POST /api/projects
-// @access  Private/Admin
+// Create project
+// POST /api/projects
+// Private/Admin
 const createProject = async (req, res) => {
   try {
     const {
@@ -46,9 +46,9 @@ const createProject = async (req, res) => {
   }
 };
 
-// @desc    Récupérer tous les projets
-// @route   GET /api/projects
-// @access  Public
+// Get all projects
+// GET /api/projects
+// Public
 const getProjects = async (req, res) => {
   try {
     const { status, type } = req.query;
@@ -68,9 +68,9 @@ const getProjects = async (req, res) => {
   }
 };
 
-// @desc    Récupérer un projet par ID
-// @route   GET /api/projects/:id
-// @access  Public
+// Get project by ID
+// GET /api/projects/:id
+// Public
 const getProjectById = async (req, res) => {
   try {
     const project = await Project.findById(req.params.id)
@@ -89,9 +89,9 @@ const getProjectById = async (req, res) => {
   }
 };
 
-// @desc    Mettre à jour un projet
-// @route   PUT /api/projects/:id
-// @access  Private/Admin
+// Update project
+// PUT /api/projects/:id
+// Private/Admin
 const updateProject = async (req, res) => {
   try {
     const project = await Project.findById(req.params.id);
@@ -117,9 +117,9 @@ const updateProject = async (req, res) => {
   }
 };
 
-// @desc    Supprimer un projet
-// @route   DELETE /api/projects/:id
-// @access  Private/Admin
+// Delete project
+// DELETE /api/projects/:id
+// Private/Admin
 const deleteProject = async (req, res) => {
   try {
     const project = await Project.findById(req.params.id);
@@ -136,9 +136,9 @@ const deleteProject = async (req, res) => {
   }
 };
 
-// @desc    S'inscrire à un projet (individuel ou équipe)
-// @route   POST /api/projects/:id/register
-// @access  Private
+// Register to project (individual or team)
+// POST /api/projects/:id/register
+// Private
 const registerToProject = async (req, res) => {
   try {
     const project = await Project.findById(req.params.id);
@@ -146,25 +146,25 @@ const registerToProject = async (req, res) => {
       return res.status(404).json({ message: 'Projet non trouvé' });
     }
 
-    // Vérifier si le projet est ouvert aux inscriptions
+    // Check if the project is open for registrations
     if (project.status !== 'active') {
       return res.status(400).json({ message: 'Ce projet n\'est pas ouvert aux inscriptions' });
     }
 
-    // Vérifier la date limite
+    // Check the registration deadline
     if (new Date() > new Date(project.endDate)) {
       return res.status(400).json({ message: 'La date limite d\'inscription est passée' });
     }
 
-    // Vérifier le type de projet
+    // Check project type
     if (project.type === 'individual') {
-      // Pour un projet individuel - un seul membre par équipe peut s'inscrire
-      // Vérifier si l'utilisateur est déjà inscrit
+      // For individual projects - only one member per team can register
+      // Check if the user is already registered
       if (project.participants.includes(req.user._id)) {
         return res.status(400).json({ message: 'Vous êtes déjà inscrit à ce projet' });
       }
 
-      // Vérifier si un autre membre de son équipe a déjà choisi ce projet
+      // Check if another member of their team has already chosen this project
       if (req.user.team) {
         const team = await Team.findById(req.user.team).populate('members');
         if (team) {
@@ -193,34 +193,39 @@ const registerToProject = async (req, res) => {
         $addToSet: { registeredProjects: project._id }
       });
     } else {
-      // Pour un projet par équipe
+      // For team projects
       if (!req.user.team) {
         return res.status(400).json({ message: 'Vous devez faire partie d\'une équipe pour vous inscrire à ce projet en équipe' });
       }
 
-      // Récupérer l'équipe avec tous ses membres
+      // Get the team with all its members
       const team = await Team.findById(req.user.team).populate('members');
       if (!team) {
-        return res.status(404).json({ message: 'Équipe non trouvée' });
+        // Nettoyer la référence orpheline
+        await User.findByIdAndUpdate(req.user._id, {
+          $unset: { team: 1 },
+          isTeamLeader: false
+        });
+        return res.status(404).json({ message: 'Équipe non trouvée. Votre référence d\'équipe a été nettoyée.' });
       }
 
-      // Vérifier si l'utilisateur est un leader
+      // Check if the user is a leader
       const isLeader = team.leaders.some(leaderId => leaderId.toString() === req.user._id.toString());
       if (!isLeader) {
         return res.status(403).json({ message: 'Seul un leader peut inscrire l\'équipe à ce projet' });
       }
 
-      // Vérifier si l'équipe a le minimum de membres
+      // Check if the team has the minimum number of members
       if (team.members.length < team.minMembers) {
         return res.status(400).json({ message: `L'équipe doit avoir au moins ${team.minMembers} membres` });
       }
 
-      // Vérifier si l'équipe est déjà inscrite à ce projet
+      // Check if the team is already registered to this project
       if (project.participants.includes(req.user.team)) {
         return res.status(400).json({ message: 'Votre équipe est déjà inscrite à ce projet' });
       }
 
-      // Vérifier si un membre de l'équipe n'a pas déjà choisi ce projet individuellement
+      // Check if a team member has already chosen this project individually
       const teamMemberIds = team.members.map(member => member._id.toString());
       const membersWithProject = await User.find({
         _id: { $in: teamMemberIds },
@@ -243,6 +248,12 @@ const registerToProject = async (req, res) => {
       await Team.findByIdAndUpdate(req.user.team, {
         $addToSet: { registeredProjects: project._id }
       });
+
+      // Ajouter le projet aux projets enregistrés de tous les membres de l'équipe
+      await User.updateMany(
+        { team: req.user.team },
+        { $addToSet: { registeredProjects: project._id } }
+      );
     }
 
     project.updatedAt = new Date();
@@ -255,9 +266,9 @@ const registerToProject = async (req, res) => {
   }
 };
 
-// @desc    Changer le statut du projet
-// @route   PATCH /api/projects/:id/status
-// @access  Private/Admin
+// Change project status
+// PATCH /api/projects/:id/status
+// Private/Admin
 const changeProjectStatus = async (req, res) => {
   try {
     const { status } = req.body;
@@ -283,9 +294,9 @@ const changeProjectStatus = async (req, res) => {
   }
 };
 
-// @desc    Récupérer les projets actifs
-// @route   GET /api/projects/active
-// @access  Public
+// Get active projects
+// GET /api/projects/active
+// Public
 const getActiveProjects = async (req, res) => {
   try {
     const now = new Date();
@@ -305,27 +316,34 @@ const getActiveProjects = async (req, res) => {
   }
 };
 
-// @desc    Récupérer les projets de l'utilisateur connecté
-// @route   GET /api/projects/my-projects
-// @access  Private
+// Get user projects
+// GET /api/projects/my-projects
+// Private
 const getUserProjects = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id)
-      .populate({
-        path: 'registeredProjects',
-        populate: {
-          path: 'createdBy',
-          select: 'firstName lastName'
-        }
-      });
-
+    const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ message: 'Utilisateur non trouvé' });
     }
 
+    // Rechercher les projets où l'utilisateur est participant OU son équipe est participante
+    const query = {
+      $or: [
+        { participants: user._id }
+      ]
+    };
+
+    if (user.team) {
+      query.$or.push({ participants: user.team });
+    }
+
+    const projects = await Project.find(query)
+      .populate('createdBy', 'firstName lastName')
+      .sort({ createdAt: -1 });
+
     res.json({
-      projects: user.registeredProjects,
-      count: user.registeredProjects.length
+      projects: projects,
+      count: projects.length
     });
   } catch (error) {
     console.error(error);
@@ -333,9 +351,9 @@ const getUserProjects = async (req, res) => {
   }
 };
 
-// @desc    Récupérer les projets de l'équipe de l'utilisateur
-// @route   GET /api/projects/team-projects
-// @access  Private
+// Get team projects
+// GET /api/projects/team-projects
+// Private
 const getTeamProjects = async (req, res) => {
   try {
     if (!req.user.team) {
@@ -366,9 +384,9 @@ const getTeamProjects = async (req, res) => {
   }
 };
 
-// @desc    Récupérer les participants d'un projet (équipes et membres individuels)
-// @route   GET /api/projects/:id/participants
-// @access  Public
+// Get project participants (teams and individual members)
+// GET /api/projects/:id/participants
+// Public
 const getProjectParticipants = async (req, res) => {
   try {
     const project = await Project.findById(req.params.id);

@@ -3,9 +3,9 @@ const Project = require('../models/Project');
 const User = require('../models/User');
 const Team = require('../models/Team');
 
-// @desc    Créer une soumission
-// @route   POST /api/submissions
-// @access  Private
+// Create submission
+// POST /api/submissions
+// Private
 const createSubmission = async (req, res) => {
   try {
     const { projectId, githubLink } = req.body;
@@ -57,6 +57,17 @@ const createSubmission = async (req, res) => {
         return res.status(400).json({ message: 'Vous devez faire partie d\'une équipe' });
       }
 
+      // Vérifier si l'équipe existe vraiment
+      const team = await Team.findById(req.user.team);
+      if (!team) {
+        // Nettoyer la référence orpheline
+        await User.findByIdAndUpdate(req.user._id, {
+          $unset: { team: 1 },
+          isTeamLeader: false
+        });
+        return res.status(404).json({ message: 'Équipe non trouvée. Votre référence d\'équipe a été nettoyée.' });
+      }
+
       // Vérifier si l'équipe est inscrite
       if (!project.participants.includes(req.user.team)) {
         return res.status(400).json({ message: 'Votre équipe n\'est pas inscrite à ce projet' });
@@ -99,9 +110,9 @@ const createSubmission = async (req, res) => {
   }
 };
 
-// @desc    Récupérer toutes les soumissions
-// @route   GET /api/submissions
-// @access  Private/Admin
+// Get all submissions
+// GET /api/submissions
+// Private/Admin
 const getSubmissions = async (req, res) => {
   try {
     const { projectId, status } = req.query;
@@ -124,9 +135,9 @@ const getSubmissions = async (req, res) => {
   }
 };
 
-// @desc    Récupérer une soumission par ID
-// @route   GET /api/submissions/:id
-// @access  Private
+// Get submission by ID
+// GET /api/submissions/:id
+// Private
 const getSubmissionById = async (req, res) => {
   try {
     const submission = await Submission.findById(req.params.id)
@@ -167,9 +178,9 @@ const getSubmissionById = async (req, res) => {
   }
 };
 
-// @desc    Mettre à jour une soumission (avant évaluation)
-// @route   PUT /api/submissions/:id
-// @access  Private
+// Update submission (before evaluation)
+// PUT /api/submissions/:id
+// Private
 const updateSubmission = async (req, res) => {
   try {
     const { githubLink } = req.body;
@@ -203,9 +214,9 @@ const updateSubmission = async (req, res) => {
   }
 };
 
-// @desc    Supprimer une soumission
-// @route   DELETE /api/submissions/:id
-// @access  Private/Admin
+// Delete submission
+// DELETE /api/submissions/:id
+// Private/Admin
 const deleteSubmission = async (req, res) => {
   try {
     const submission = await Submission.findById(req.params.id);
@@ -222,9 +233,9 @@ const deleteSubmission = async (req, res) => {
   }
 };
 
-// @desc    Évaluer une soumission (Admin)
-// @route   POST /api/submissions/:id/review
-// @access  Private/Admin
+// Evaluate submission (Admin)
+// POST /api/submissions/:id/review
+// Private/Admin
 const reviewSubmission = async (req, res) => {
   try {
     const { status, score, feedback } = req.body;
@@ -250,9 +261,9 @@ const reviewSubmission = async (req, res) => {
   }
 };
 
-// @desc    Attribuer un classement et des points
-// @route   POST /api/submissions/:id/rank
-// @access  Private/Admin
+// Assign ranking and points
+// POST /api/submissions/:id/rank
+// Private/Admin
 const rankSubmission = async (req, res) => {
   try {
     const { ranking } = req.body;
@@ -372,9 +383,9 @@ const rankSubmission = async (req, res) => {
   }
 };
 
-// @desc    Récupérer mes soumissions
-// @route   GET /api/submissions/my
-// @access  Private
+// Get my submissions
+// GET /api/submissions/my
+// Private
 const getMySubmissions = async (req, res) => {
   try {
     let query = {};
@@ -401,9 +412,9 @@ const getMySubmissions = async (req, res) => {
   }
 };
 
-// @desc    Récupérer les soumissions d'une équipe
-// @route   GET /api/submissions/team/:teamId
-// @access  Private (membre de l'équipe ou admin)
+// Get team submissions
+// GET /api/submissions/team/:teamId
+// Private (team member or admin)
 const getTeamSubmissions = async (req, res) => {
   try {
     const { teamId } = req.params;
@@ -433,9 +444,9 @@ const getTeamSubmissions = async (req, res) => {
   }
 };
 
-// @desc    Ajouter des points à un utilisateur ou une équipe
-// @route   POST /api/submissions/add-points
-// @access  Private/Admin
+// Add points to a user or team
+// POST /api/submissions/add-points
+// Private/Admin
 const addPoints = async (req, res) => {
   try {
     const { userId, teamId, points, reason } = req.body;

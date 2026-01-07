@@ -1,3 +1,4 @@
+// DB Config - normalized path
 const mongoose = require('mongoose');
 
 const connectDB = async () => {

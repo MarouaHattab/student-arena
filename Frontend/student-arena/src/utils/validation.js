@@ -1,4 +1,3 @@
-// ==================== AUTH VALIDATIONS ====================
 
 export const validateRegister = (formData) => {
   const errors = {};
@@ -29,12 +28,9 @@ export const validateRegister = (formData) => {
   }
 
   // Password validation
-  if (!formData.password) {
-    errors.password = 'Le mot de passe est requis';
-  } else if (formData.password.length < 8) {
-    errors.password = 'Le mot de passe doit contenir au moins 8 caractères';
-  } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
-    errors.password = 'Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre';
+  const passwordError = validatePassword(formData.password);
+  if (passwordError) {
+    errors.password = passwordError;
   }
 
   // UserName validation
@@ -64,6 +60,34 @@ export const validateLogin = (formData) => {
     errors.password = 'Le mot de passe est requis';
   }
 
+  return errors;
+};
+
+export const validatePassword = (password) => {
+  if (!password) return 'Le mot de passe est requis';
+  if (password.length < 8) return 'Le mot de passe doit contenir au moins 8 caractères';
+  if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+    return 'Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre';
+  }
+  return null;
+};
+
+export const validateChangePassword = (data) => {
+  const errors = {};
+  
+  if (!data.currentPassword) {
+    errors.currentPassword = 'Le mot de passe actuel est requis';
+  }
+  
+  const newPasswordError = validatePassword(data.newPassword);
+  if (newPasswordError) {
+    errors.newPassword = newPasswordError;
+  }
+  
+  if (data.newPassword !== data.confirmPassword) {
+    errors.confirmPassword = 'Les mots de passe ne correspondent pas';
+  }
+  
   return errors;
 };
 

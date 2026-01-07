@@ -3,9 +3,8 @@ const User = require('../models/User');
 const Team = require('../models/Team');
 const Submission = require('../models/Submission');
 
-// @desc    Récupérer le leaderboard global des utilisateurs
-// @route   GET /api/leaderboard/users
-// @access  Public
+// Get users leaderboard
+// GET /api/leaderboard/users
 const getUsersLeaderboard = async (req, res) => {
   try {
     const users = await User.find()
@@ -29,9 +28,8 @@ const getUsersLeaderboard = async (req, res) => {
   }
 };
 
-// @desc    Récupérer le leaderboard global des équipes
-// @route   GET /api/leaderboard/teams
-// @access  Public
+// Get teams leaderboard
+// GET /api/leaderboard/teams
 const getTeamsLeaderboard = async (req, res) => {
   try {
     const teams = await Team.find({ status: 'active' })
@@ -55,9 +53,8 @@ const getTeamsLeaderboard = async (req, res) => {
   }
 };
 
-// @desc    Récupérer le leaderboard d'un projet spécifique
-// @route   GET /api/leaderboard/project/:projectId
-// @access  Public
+// Get project leaderboard
+// GET /api/leaderboard/project/:projectId
 const getProjectLeaderboard = async (req, res) => {
   try {
     const { projectId } = req.params;
@@ -95,9 +92,8 @@ const getProjectLeaderboard = async (req, res) => {
   }
 };
 
-// @desc    Récupérer le leaderboard combiné (utilisateurs + équipes)
-// @route   GET /api/leaderboard
-// @access  Public
+// Get global leaderboard(users + teams)
+// GET /api/leaderboard
 const getGlobalLeaderboard = async (req, res) => {
   try {
     const { type, limit = 20 } = req.query;
@@ -142,20 +138,19 @@ const getGlobalLeaderboard = async (req, res) => {
   }
 };
 
-// @desc    Mettre à jour les entrées du leaderboard (Admin)
-// @route   POST /api/leaderboard/update
-// @access  Private/Admin
+// Update leaderboard
+// POST /api/leaderboard/update
 const updateLeaderboard = async (req, res) => {
   try {
-    // Récupérer tous les utilisateurs et mettre à jour le leaderboard
+    // Get all users and update leaderboard
     const users = await User.find().sort({ points: -1 });
 
-    // Supprimer les anciennes entrées du leaderboard global
+    // Delete old leaderboard entries
     await Leaderboard.deleteMany({ project: null });
 
-    // Créer les nouvelles entrées pour les utilisateurs
+    // Create new leaderboard entries for users
     const userEntries = users.map((user, index) => ({
-      project: null, // Leaderboard global
+      project: null, // Global leaderboard
       position: index + 1,
       user: user._id,
       points: user.points || 0,
@@ -163,11 +158,11 @@ const updateLeaderboard = async (req, res) => {
       createdAt: new Date()
     }));
 
-    // Récupérer toutes les équipes actives et mettre à jour le leaderboard
+    // Get all teams and update leaderboard
     const teams = await Team.find({ status: 'active' }).sort({ points: -1 });
 
     const teamEntries = teams.map((team, index) => ({
-      project: null, // Leaderboard global
+      project: null, // Global leaderboard
       position: index + 1,
       team: team._id,
       points: team.points || 0,
@@ -175,19 +170,18 @@ const updateLeaderboard = async (req, res) => {
       createdAt: new Date()
     }));
 
-    // Insérer toutes les entrées
+    // Insert all entries
     await Leaderboard.insertMany([...userEntries, ...teamEntries]);
 
-    res.json({ message: 'Leaderboard mis à jour avec succès' });
+    res.json({ message: 'Leaderboard updated successfully' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Erreur serveur', error: error.message });
   }
 };
 
-// @desc    Récupérer la position d'un utilisateur
-// @route   GET /api/leaderboard/user/:userId/position
-// @access  Public
+// Get user position
+// GET /api/leaderboard/user/:userId/position
 const getUserPosition = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -214,9 +208,8 @@ const getUserPosition = async (req, res) => {
   }
 };
 
-// @desc    Récupérer la position d'une équipe
-// @route   GET /api/leaderboard/team/:teamId/position
-// @access  Public
+// Get team position
+// GET /api/leaderboard/team/:teamId/position
 const getTeamPosition = async (req, res) => {
   try {
     const { teamId } = req.params;

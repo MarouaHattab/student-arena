@@ -13,7 +13,7 @@ const Projects = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
   const [filterType, setFilterType] = useState("");
-  const [filterStatus, setFilterStatus] = useState("active");
+  const [filterStatus, setFilterStatus] = useState("");
   const [registering, setRegistering] = useState(null);
   const [profile, setProfile] = useState(null);
 
@@ -24,10 +24,11 @@ const Projects = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
+      // Récupérer tous les projets visibles (actifs et terminés) pour permettre le filtrage
       const [projectsRes, myProjectsRes, profileRes] = await Promise.all([
-        api.get('/projects?status=active'),
-        api.get('/projects/my-projects'),
-        api.get('/users/profile')
+        api.get("/projects"), // Récupérer tous les projets visibles sans filtre de statut
+        api.get("/projects/my-projects"),
+        api.get("/users/profile"),
       ]);
       setProjects(projectsRes.data);
       setMyProjects(myProjectsRes.data.projects || []);
@@ -52,8 +53,19 @@ const Projects = () => {
     }
   };
 
-  const isRegistered = (projectId) => {
-    return myProjects.some(p => p._id === projectId);
+  const isRegistered = (project) => {
+    // Vérification via myProjects (inscriptions directes ou synchronisées)
+    if (myProjects.some((p) => p._id === project._id)) return true;
+
+    // Vérification de secours pour les projets d'équipe
+    if (project.type === "team" && profile?.team) {
+      const teamId = profile.team._id || profile.team;
+      return project.participants?.some(
+        (p) => (p._id || p) === teamId || p === teamId
+      );
+    }
+
+    return false;
   };
 
   const formatDate = (date) => {
@@ -63,13 +75,14 @@ const Projects = () => {
     });
   };
 
-  const filteredProjects = projects.filter(p => {
+  const filteredProjects = projects.filter((p) => {
     if (filterType && p.type !== filterType) return false;
     if (filterStatus && p.status !== filterStatus) return false;
     return true;
   });
 
-  if (loading) return <div className="loading-screen">Chargement de l'Arena...</div>;
+  if (loading)
+    return <div className="loading-screen">Chargement de l'Arena...</div>;
 
   return (
     <div className="projects-page">
@@ -78,89 +91,139 @@ const Projects = () => {
         <header className="section-header">
           <div>
             <h1 className="section-title">Catalogue des Projets</h1>
-            <p className="subtitle">Relevez les défis et gagnez des points pour votre équipe.</p>
+            <p className="subtitle">
+              Relevez les défis et gagnez des points pour votre équipe.
+            </p>
           </div>
           <div className="header-actions">
             <div className="tab-pill-container">
-                <button onClick={() => setActiveTab("all")} className={activeTab === 'all' ? 'active' : ''}>Exploration</button>
-                <button onClick={() => setActiveTab("my")} className={activeTab === 'my' ? 'active' : ''}>Mes Inscriptions</button>
+              <button
+                onClick={() => setActiveTab("all")}
+                className={activeTab === "all" ? "active" : ""}
+              >
+                Exploration
+              </button>
+              <button
+                onClick={() => setActiveTab("my")}
+                className={activeTab === "my" ? "active" : ""}
+              >
+                Mes Inscriptions
+              </button>
             </div>
           </div>
         </header>
 
         {activeTab === "all" && (
           <div className="filter-shelf fade-in">
-              <div className="filter-group">
-                <label>Type de participation</label>
-                <select value={filterType} onChange={(e) => setFilterType(e.target.value)}>
-                    <option value="">Tous les types</option>
-                    <option value="individual">👤 Solo</option>
-                    <option value="team">👥 Team</option>
-                </select>
-              </div>
-              <div className="filter-group">
-                <label>État du projet</label>
-                <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
-                    <option value="active">🟢 En cours</option>
-                    <option value="completed">🔵 Terminé</option>
-                </select>
-              </div>
+            <div className="filter-group">
+              <label>Type de participation</label>
+              <select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+              >
+                <option value="">Tous les types</option>
+                <option value="individual">👤 Solo</option>
+                <option value="team">👥 Team</option>
+              </select>
+            </div>
+            <div className="filter-group">
+              <label>État du projet</label>
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+              >
+                <option value="active">🟢 En cours</option>
+                <option value="completed">🔵 Terminé</option>
+              </select>
+            </div>
           </div>
         )}
 
         <div className="projects-grid fade-in">
-          {(activeTab === "all" ? filteredProjects : myProjects).map((project) => (
-            <div key={project._id} className="project-card card premium-shadow">
-              <div className="card-top">
-                <div className={`type-indicator ${project.type}`}>
-                    {project.type === 'team' ? 'TEAM' : 'SOLO'}
-                </div>
-                <div className="points-pool">
-                   🏆 {project.firstPlacePoints} pts
-                </div>
-              </div>
-              
-              <h3 className="project-title">{project.title}</h3>
-              <p className="project-desc">{project.description}</p>
-              
-              <div className="tag-cloud">
-                {project.tags?.map((tag, i) => (
-                    <span key={i} className="project-tag">#{tag}</span>
-                ))}
-              </div>
-
-              <div className="project-footer">
-                <div className="meta-info">
-                   <div className="meta-item">📅 Finit le {formatDate(project.endDate)}</div>
-                   <div className="meta-item">👥 {project.participants?.length || 0} inscrits</div>
-                </div>
-                
-                <div className="btn-row">
-                    <button onClick={() => navigate(`/projects/${project._id}`)} className="btn-outline">
-                        Explorer
-                    </button>
-                    {isRegistered(project._id) ? (
-                        <div className="registered-tag">✓ Inscrit</div>
-                    ) : (
-                        <button 
-                            onClick={() => handleRegister(project._id)} 
-                            className="btn-primary"
-                            disabled={registering === project._id || project.status !== 'active'}
-                        >
-                            {registering === project._id ? "..." : "Participer"}
-                        </button>
+          {(activeTab === "all" ? filteredProjects : myProjects).map(
+            (project) => (
+              <div
+                key={project._id}
+                className="project-card card premium-shadow"
+              >
+                <div className="card-top">
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "8px",
+                      alignItems: "center",
+                    }}
+                  >
+                    <div className={`type-indicator ${project.type}`}>
+                      {project.type === "team" ? "TEAM" : "SOLO"}
+                    </div>
+                    {project.status === "completed" && (
+                      <div className="status-badge completed">TERMINÉ</div>
                     )}
+                    {project.status === "active" && (
+                      <div className="status-badge active">EN COURS</div>
+                    )}
+                  </div>
+                  <div className="points-pool">
+                    🏆 {project.firstPlacePoints} pts
+                  </div>
+                </div>
+
+                <h3 className="project-title">{project.title}</h3>
+                <p className="project-desc">{project.description}</p>
+
+                <div className="tag-cloud">
+                  {project.tags?.map((tag, i) => (
+                    <span key={i} className="project-tag">
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="project-footer">
+                  <div className="meta-info">
+                    <div className="meta-item">
+                      📅 Finit le {formatDate(project.endDate)}
+                    </div>
+                    <div className="meta-item">
+                      👥 {project.participants?.length || 0} inscrits
+                    </div>
+                  </div>
+
+                  <div className="btn-row">
+                    <button
+                      onClick={() => navigate(`/projects/${project._id}`)}
+                      className="btn-outline"
+                    >
+                      Explorer
+                    </button>
+                    {isRegistered(project) ? (
+                      <div className="registered-tag">✓ Inscrit</div>
+                    ) : (
+                      <button
+                        onClick={() => handleRegister(project._id)}
+                        className="btn-primary"
+                        disabled={
+                          registering === project._id ||
+                          project.status !== "active"
+                        }
+                      >
+                        {registering === project._id ? "..." : "Participer"}
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            )
+          )}
 
-          {(activeTab === 'all' ? filteredProjects : myProjects).length === 0 && (
-              <div className="empty-projects">
-                  <div className="empty-icon">📂</div>
-                  <h3>Aucun projet ici</h3>
-                  <p>Repassez plus tard pour de nouveaux défis !</p>
-              </div>
+          {(activeTab === "all" ? filteredProjects : myProjects).length ===
+            0 && (
+            <div className="empty-projects">
+              <div className="empty-icon">📂</div>
+              <h3>Aucun projet ici</h3>
+              <p>Repassez plus tard pour de nouveaux défis !</p>
+            </div>
           )}
         </div>
       </main>
@@ -186,6 +249,10 @@ const Projects = () => {
         .type-indicator { padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; letter-spacing: 0.5px; }
         .type-indicator.individual { background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; }
         .type-indicator.team { background: #eef2ff; color: #4338ca; border: 1px solid #e0e7ff; }
+        
+        .status-badge { padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 800; letter-spacing: 0.5px; }
+        .status-badge.completed { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+        .status-badge.active { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
         
         .points-pool { font-weight: 800; color: #10b981; font-size: 14px; }
         

@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
 import api from "../api/axiosConfig";
 import Navbar from "../components/Navbar";
 
@@ -63,6 +62,23 @@ const TEAM_STYLES = `
   .main-info-card { padding: 32px; margin-bottom: 32px; }
   .description-text-large { font-size: 16px; line-height: 1.8; color: #475569; margin: 0; }
   
+  /* Team Projects Section */
+  .team-projects-list { display: flex; flex-direction: column; gap: 16px; }
+  .team-project-item { padding: 20px; background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0; transition: all 0.2s; }
+  .team-project-item:hover { border-color: #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+  .project-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .project-name { font-size: 18px; font-weight: 800; color: #1e293b; margin: 0; cursor: pointer; transition: color 0.2s; }
+  .project-name:hover { color: #6366f1; }
+  .project-status-badge { padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; }
+  .project-status-badge.active { background: #dcfce7; color: #166534; }
+  .project-status-badge.completed { background: #dbeafe; color: #1e40af; }
+  .project-description-short { font-size: 14px; color: #64748b; line-height: 1.6; margin-bottom: 12px; }
+  .participating-members { margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0; }
+  .members-label { font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 8px; }
+  .members-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .member-tag { padding: 4px 10px; background: #eef2ff; color: #4338ca; border-radius: 6px; font-size: 12px; font-weight: 600; }
+  .no-projects-text { text-align: center; color: #94a3b8; font-size: 14px; padding: 20px 0; }
+  
   .danger-zone { background: #fff; border: 1px dashed #fecaca; }
   .danger-content { display: flex; justify-content: space-between; align-items: center; }
   .danger-title { font-size: 16px; font-weight: 800; color: #dc2626; margin: 0; }
@@ -89,12 +105,11 @@ const TEAM_STYLES = `
 
 const Team = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
 
   const [profile, setProfile] = useState(null);
   const [team, setTeam] = useState(null);
+  const [teamProjects, setTeamProjects] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   // Modal states
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -103,9 +118,17 @@ const Team = () => {
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
 
   // Form states
-  const [createForm, setCreateForm] = useState({ name: "", description: "", slogan: "" });
+  const [createForm, setCreateForm] = useState({
+    name: "",
+    description: "",
+    slogan: "",
+  });
   const [joinCode, setJoinCode] = useState("");
-  const [editForm, setEditForm] = useState({ name: "", description: "", slogan: "" });
+  const [editForm, setEditForm] = useState({
+    name: "",
+    description: "",
+    slogan: "",
+  });
   const [addMemberInput, setAddMemberInput] = useState("");
 
   // Loading states
@@ -118,22 +141,42 @@ const Team = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const profileData = (await api.get('/users/profile')).data;
+      const profileData = (await api.get("/users/profile")).data;
       setProfile(profileData);
 
-      if (profileData.team) {
-        const teamData = (await api.get(`/teams/${profileData.team._id}`)).data;
-        setTeam(teamData);
-        setEditForm({
-          name: teamData.name || "",
-          description: teamData.description || "",
-          slogan: teamData.slogan || ""
-        });
+      if (profileData.team && profileData.team._id) {
+        try {
+          const [teamData, projectsRes] = await Promise.all([
+            api.get(`/teams/${profileData.team._id}`),
+            api
+              .get("/projects/team-projects")
+              .catch(() => ({ data: { projects: [] } })),
+          ]);
+          setTeam(teamData.data);
+          setTeamProjects(projectsRes.data.projects || []);
+          setEditForm({
+            name: teamData.data.name || "",
+            description: teamData.data.description || "",
+            slogan: teamData.data.slogan || "",
+          });
+        } catch (teamErr) {
+          // Si l'équipe n'existe pas (référence orpheline), nettoyer l'état
+          if (teamErr.response?.status === 404) {
+            setTeam(null);
+            setTeamProjects([]);
+            // Recharger le profil pour obtenir les données mises à jour
+            const updatedProfile = (await api.get("/users/profile")).data;
+            setProfile(updatedProfile);
+          } else {
+            throw teamErr;
+          }
+        }
       } else {
         setTeam(null);
+        setTeamProjects([]);
       }
     } catch (err) {
-      setError(err.response?.data?.message || "Erreur lors du chargement");
+      console.error("Error fetching data:", err);
     } finally {
       setLoading(false);
     }
@@ -143,7 +186,7 @@ const Team = () => {
     e.preventDefault();
     try {
       setIsSubmitting(true);
-      await api.post('/teams', createForm);
+      await api.post("/teams", createForm);
       setShowCreateModal(false);
       setCreateForm({ name: "", description: "", slogan: "" });
       await fetchData();
@@ -158,7 +201,7 @@ const Team = () => {
     e.preventDefault();
     try {
       setIsSubmitting(true);
-      await api.post('/teams/join', { invitationCode: joinCode });
+      await api.post("/teams/join", { invitationCode: joinCode });
       setShowJoinModal(false);
       setJoinCode("");
       await fetchData();
@@ -187,6 +230,7 @@ const Team = () => {
     if (window.confirm("Êtes-vous sûr de vouloir quitter l'équipe ?")) {
       try {
         await api.post(`/teams/${team._id}/leave`);
+        // Rafraîchir le profil pour refléter que l'utilisateur n'a plus d'équipe
         await fetchData();
       } catch (err) {
         alert(err.response?.data?.message || "Erreur lors du départ");
@@ -195,7 +239,11 @@ const Team = () => {
   };
 
   const handleDeleteTeam = async () => {
-    if (window.confirm("Action irréversible : Supprimer définitivement l'équipe ?")) {
+    if (
+      window.confirm(
+        "Action irréversible : Supprimer définitivement l'équipe ?"
+      )
+    ) {
       try {
         await api.delete(`/teams/${team._id}`);
         await fetchData();
@@ -209,7 +257,9 @@ const Team = () => {
     e.preventDefault();
     try {
       setIsSubmitting(true);
-      await api.post(`/teams/${team._id}/add-member`, { emailOrUsername: addMemberInput });
+      await api.post(`/teams/${team._id}/add-member`, {
+        emailOrUsername: addMemberInput,
+      });
       setAddMemberInput("");
       setShowAddMemberModal(false);
       await fetchData();
@@ -224,6 +274,7 @@ const Team = () => {
     if (window.confirm(`Retirer ${memberName} de l'équipe ?`)) {
       try {
         await api.delete(`/teams/${team._id}/members/${memberId}`);
+        // Forcer le rafraîchissement complet des données
         await fetchData();
       } catch (err) {
         alert(err.response?.data?.message || "Erreur lors du retrait");
@@ -258,9 +309,14 @@ const Team = () => {
     alert("Code copié dans le presse-papier !");
   };
 
-  const isLeader = team?.leaders?.some(l => l._id === profile?._id);
+  const isLeader = team?.leaders?.some((l) => l._id === profile?._id);
 
-  if (loading) return <div className="loading-screen"><style>{TEAM_STYLES}</style>Chargement du QG...</div>;
+  if (loading)
+    return (
+      <div className="loading-screen">
+        <style>{TEAM_STYLES}</style>Chargement du QG...
+      </div>
+    );
 
   if (!team) {
     return (
@@ -269,56 +325,133 @@ const Team = () => {
         <Navbar />
         <main className="page-container">
           <div className="no-team-hero card premium-shadow fade-in">
-              <div className="no-team-icon">🛡️</div>
-              <h1 className="no-team-title">Rejoignez l'élite</h1>
-              <p className="no-team-text">Pour participer aux projets d'envergure, vous avez besoin d'une escouade. Créez la vôtre ou rejoignez des experts.</p>
-              <div className="no-team-actions">
-                  <button onClick={() => setShowJoinModal(true)} className="btn-outline-large">Rejoindre via code</button>
-                  <button onClick={() => setShowCreateModal(true)} className="btn-primary-large">Créer une Équipe</button>
-              </div>
+            <div className="no-team-icon">🛡️</div>
+            <h1 className="no-team-title">Rejoignez l'élite</h1>
+            <p className="no-team-text">
+              Pour participer aux projets d'envergure, vous avez besoin d'une
+              escouade. Créez la vôtre ou rejoignez des experts.
+            </p>
+            <div className="no-team-actions">
+              <button
+                onClick={() => setShowJoinModal(true)}
+                className="btn-outline-large"
+              >
+                Rejoindre via code
+              </button>
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="btn-primary-large"
+              >
+                Créer une Équipe
+              </button>
+            </div>
           </div>
         </main>
 
         {showCreateModal && (
-          <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
-            <div className="modal-content glass-card" onClick={e => e.stopPropagation()}>
-                <div className="modal-header">
-                  <h2>Fonder une Équipe</h2>
-                  <button className="close-btn" onClick={() => setShowCreateModal(false)}>×</button>
+          <div
+            className="modal-overlay"
+            onClick={() => setShowCreateModal(false)}
+          >
+            <div
+              className="modal-content glass-card"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="modal-header">
+                <h2>Fonder une Équipe</h2>
+                <button
+                  className="close-btn"
+                  onClick={() => setShowCreateModal(false)}
+                >
+                  ×
+                </button>
+              </div>
+              <form onSubmit={handleCreateTeam} className="modal-body">
+                <div className="form-group">
+                  <label>Nom de l'escouade</label>
+                  <input
+                    type="text"
+                    value={createForm.name}
+                    onChange={(e) =>
+                      setCreateForm({ ...createForm, name: e.target.value })
+                    }
+                    required
+                    placeholder="Ex: Neural Knights"
+                  />
                 </div>
-                <form onSubmit={handleCreateTeam} className="modal-body">
-                   <div className="form-group">
-                      <label>Nom de l'escouade</label>
-                      <input type="text" value={createForm.name} onChange={e => setCreateForm({...createForm, name: e.target.value})} required placeholder="Ex: Neural Knights" />
-                   </div>
-                   <div className="form-group">
-                      <label>Slogan</label>
-                      <input type="text" value={createForm.slogan} onChange={e => setCreateForm({...createForm, slogan: e.target.value})} placeholder="Ex: On code, vous gagnez" />
-                   </div>
-                   <div className="form-group">
-                      <label>Description des objectifs</label>
-                      <textarea value={createForm.description} onChange={e => setCreateForm({...createForm, description: e.target.value})} placeholder="Quelle est votre mission ?" />
-                   </div>
-                   <button type="submit" disabled={isSubmitting} className="btn-primary full-width">Lancer l'Équipe</button>
-                </form>
+                <div className="form-group">
+                  <label>Slogan</label>
+                  <input
+                    type="text"
+                    value={createForm.slogan}
+                    onChange={(e) =>
+                      setCreateForm({ ...createForm, slogan: e.target.value })
+                    }
+                    placeholder="Ex: On code, vous gagnez"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Description des objectifs</label>
+                  <textarea
+                    value={createForm.description}
+                    onChange={(e) =>
+                      setCreateForm({
+                        ...createForm,
+                        description: e.target.value,
+                      })
+                    }
+                    placeholder="Quelle est votre mission ?"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="btn-primary full-width"
+                >
+                  Lancer l'Équipe
+                </button>
+              </form>
             </div>
           </div>
         )}
 
         {showJoinModal && (
-          <div className="modal-overlay" onClick={() => setShowJoinModal(false)}>
-            <div className="modal-content glass-card" onClick={e => e.stopPropagation()}>
-                <div className="modal-header">
-                  <h2>Rejoindre une Équipe</h2>
-                  <button className="close-btn" onClick={() => setShowJoinModal(false)}>×</button>
+          <div
+            className="modal-overlay"
+            onClick={() => setShowJoinModal(false)}
+          >
+            <div
+              className="modal-content glass-card"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="modal-header">
+                <h2>Rejoindre une Équipe</h2>
+                <button
+                  className="close-btn"
+                  onClick={() => setShowJoinModal(false)}
+                >
+                  ×
+                </button>
+              </div>
+              <form onSubmit={handleJoinTeam} className="modal-body">
+                <div className="form-group">
+                  <label>Code d'invitation</label>
+                  <input
+                    type="text"
+                    value={joinCode}
+                    onChange={(e) => setJoinCode(e.target.value)}
+                    required
+                    placeholder="TEAM-XXXX-1234"
+                  />
                 </div>
-                <form onSubmit={handleJoinTeam} className="modal-body">
-                   <div className="form-group">
-                      <label>Code d'invitation</label>
-                      <input type="text" value={joinCode} onChange={e => setJoinCode(e.target.value)} required placeholder="TEAM-XXXX-1234" />
-                   </div>
-                   <button type="submit" disabled={isSubmitting} className="btn-primary full-width">Vérifier le Code & Entrer</button>
-                </form>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="btn-primary full-width"
+                >
+                  Vérifier le Code & Entrer
+                </button>
+              </form>
             </div>
           </div>
         )}
@@ -332,114 +465,292 @@ const Team = () => {
       <Navbar />
       <main className="page-container">
         <div className="team-dash-header card premium-shadow">
-           <div className="team-info-main">
-              <div className="team-large-avatar">
-                {team.name?.charAt(0)?.toUpperCase()}
+          <div className="team-info-main">
+            <div className="team-large-avatar">
+              {team.name?.charAt(0)?.toUpperCase()}
+            </div>
+            <div className="team-text-meta">
+              <h1 className="team-title">{team.name}</h1>
+              <p className="team-slogan">
+                "{team.slogan || "Prêts à relever tous les défis"}"
+              </p>
+              <div className="team-meta-pills">
+                <span className="meta-pill">
+                  👥 {team.members?.length} membres
+                </span>
+                <span className="meta-pill">🏆 {team.points} points</span>
+                <span className={`status-pill ${team.status}`}>
+                  {team.status}
+                </span>
               </div>
-              <div className="team-text-meta">
-                  <h1 className="team-title">{team.name}</h1>
-                  <p className="team-slogan">"{team.slogan || 'Prêts à relever tous les défis'}"</p>
-                  <div className="team-meta-pills">
-                     <span className="meta-pill">👥 {team.members?.length} membres</span>
-                     <span className="meta-pill">🏆 {team.points} points</span>
-                     <span className={`status-pill ${team.status}`}>{team.status}</span>
-                  </div>
-              </div>
-           </div>
-           {isLeader && (
-             <div className="team-admin-actions">
-                <button onClick={() => setShowEditModal(true)} className="btn-icon-edit-large">⚙️</button>
-                <button onClick={handleDeleteTeam} className="btn-icon-delete-large">🗑️</button>
-             </div>
-           )}
+            </div>
+          </div>
+          {isLeader && (
+            <div className="team-admin-actions">
+              <button
+                onClick={() => setShowEditModal(true)}
+                className="btn-icon-edit-large"
+              >
+                ⚙️
+              </button>
+              <button
+                onClick={handleDeleteTeam}
+                className="btn-icon-delete-large"
+              >
+                🗑️
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="team-content-grid">
-           <div className="team-side">
-              <div className="card side-card">
-                 <h3 className="side-title">Accès Privé</h3>
-                 <div className="invite-box">
-                    <code className="invite-code-display">{team.invitationCode}</code>
-                    <button onClick={copyInvitationCode} className="btn-copy">Copier Code</button>
-                 </div>
-                 <p className="invite-hint">Seuls les membres possédant ce code secret peuvent rejoindre l'escouade.</p>
+          <div className="team-side">
+            <div className="card side-card">
+              <h3 className="side-title">Accès Privé</h3>
+              <div className="invite-box">
+                <code className="invite-code-display">
+                  {team.invitationCode}
+                </code>
+                <button onClick={copyInvitationCode} className="btn-copy">
+                  Copier Code
+                </button>
               </div>
+              <p className="invite-hint">
+                Seuls les membres possédant ce code secret peuvent rejoindre
+                l'escouade.
+              </p>
+            </div>
 
-              <div className="card side-card">
-                <h3 className="side-title">Membres de l'escouade ({team.members?.length}/{team.maxMembers})</h3>
-                <div className="member-list-stack">
-                  {team.members?.map(member => {
-                    const memberIsLeader = team.leaders?.some(l => l._id === member._id);
-                    const isMe = member._id === profile?._id;
-                    return (
-                      <div key={member._id} className="member-item-row">
-                         <div className="member-avatar-mini">
-                            {member.userName?.charAt(0)?.toUpperCase() || '?'}
-                         </div>
-                         <div className="member-details">
-                            <span className="member-realname">{member.firstName} {member.lastName} {isMe && '(C\'est vous)'}</span>
-                            <span className="member-handle">@{member.userName}</span>
-                         </div>
-                         <div className="member-badge-col">
-                            {memberIsLeader ? <span className="badge-leader">LEADER</span> : <span className="badge-member">PILOTE</span>}
-                         </div>
-                         {isLeader && !isMe && (
-                             <div className="member-controls">
-                                <button onClick={() => memberIsLeader ? handleRemoveLeadership(member._id, member.firstName) : handleGiveLeadership(member._id, member.firstName)} className="btn-control-mini" title="Modifier rang">👑</button>
-                                <button onClick={() => handleRemoveMember(member._id, member.firstName)} className="btn-control-mini danger" title="Exclure">✖</button>
-                             </div>
-                         )}
+            <div className="card side-card">
+              <h3 className="side-title">
+                Membres de l'escouade ({team.members?.length}/{team.maxMembers})
+              </h3>
+              <div className="member-list-stack">
+                {team.members?.map((member) => {
+                  const memberIsLeader = team.leaders?.some(
+                    (l) => l._id === member._id
+                  );
+                  const isMe = member._id === profile?._id;
+                  return (
+                    <div key={member._id} className="member-item-row">
+                      <div className="member-avatar-mini">
+                        {member.userName?.charAt(0)?.toUpperCase() || "?"}
                       </div>
-                    )
-                  })}
-                </div>
-                {isLeader && team.members?.length < team.maxMembers && (
-                    <button onClick={() => setShowAddMemberModal(true)} className="btn-add-member-full">+ Ajouter Recrue</button>
-                )}
-              </div>
-           </div>
-
-           <div className="team-main-content">
-              <div className="card main-info-card">
-                 <h3 className="side-title">Mission de l'Équipe</h3>
-                 <p className="description-text-large">{team.description || "Aucune mission définie pour le moment. Le leader peut en spécifier une dans les réglages."}</p>
-              </div>
-
-              <div className="card main-info-card danger-zone">
-                 <div className="danger-content">
-                    <div>
-                      <h4 className="danger-title">Quitter l'escouade</h4>
-                      <p className="danger-subtitle">Vous perdrez l'accès aux points de groupe et aux projets d'équipe.</p>
+                      <div className="member-details">
+                        <span className="member-realname">
+                          {member.firstName} {member.lastName}{" "}
+                          {isMe && "(C'est vous)"}
+                        </span>
+                        <span className="member-handle">
+                          @{member.userName}
+                        </span>
+                      </div>
+                      <div className="member-badge-col">
+                        {memberIsLeader ? (
+                          <span className="badge-leader">LEADER</span>
+                        ) : (
+                          <span className="badge-member">PILOTE</span>
+                        )}
+                      </div>
+                      {isLeader && !isMe && (
+                        <div className="member-controls">
+                          <button
+                            onClick={() =>
+                              memberIsLeader
+                                ? handleRemoveLeadership(
+                                    member._id,
+                                    member.firstName
+                                  )
+                                : handleGiveLeadership(
+                                    member._id,
+                                    member.firstName
+                                  )
+                            }
+                            className="btn-control-mini"
+                            title="Modifier rang"
+                          >
+                            👑
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleRemoveMember(member._id, member.firstName)
+                            }
+                            className="btn-control-mini danger"
+                            title="Exclure"
+                          >
+                            ✖
+                          </button>
+                        </div>
+                      )}
                     </div>
-                    <button onClick={handleLeaveTeam} className="btn-danger-outline">Quitter</button>
-                 </div>
+                  );
+                })}
               </div>
-           </div>
+              {isLeader && team.members?.length < team.maxMembers && (
+                <button
+                  onClick={() => setShowAddMemberModal(true)}
+                  className="btn-add-member-full"
+                >
+                  + Ajouter Recrue
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="team-main-content">
+            <div className="card main-info-card">
+              <h3 className="side-title">Mission de l'Équipe</h3>
+              <p className="description-text-large">
+                {team.description ||
+                  "Aucune mission définie pour le moment. Le leader peut en spécifier une dans les réglages."}
+              </p>
+            </div>
+
+            <div className="card main-info-card">
+              <h3 className="side-title">Projets de Groupe</h3>
+              {teamProjects.filter((project) => project.type === "team")
+                .length > 0 ? (
+                <div className="team-projects-list">
+                  {teamProjects
+                    .filter((project) => project.type === "team")
+                    .map((project) => {
+                      // Vérifier si l'équipe participe à ce projet
+                      const teamParticipates = project.participants?.some(
+                        (p) => {
+                          const participantId = p._id || p;
+                          return participantId === team._id;
+                        }
+                      );
+
+                      // Si l'équipe participe, tous les membres participent
+                      const participatingMembers = teamParticipates
+                        ? team.members
+                        : [];
+
+                      return (
+                        <div key={project._id} className="team-project-item">
+                          <div className="project-header-row">
+                            <h4
+                              className="project-name"
+                              onClick={() =>
+                                navigate(`/projects/${project._id}`)
+                              }
+                            >
+                              {project.title}
+                            </h4>
+                            <span
+                              className={`project-status-badge ${project.status}`}
+                            >
+                              {project.status === "active"
+                                ? "🟢 En cours"
+                                : project.status === "completed"
+                                ? "🔵 Terminé"
+                                : project.status}
+                            </span>
+                          </div>
+                          <p className="project-description-short">
+                            {project.description?.substring(0, 100)}...
+                          </p>
+                          {participatingMembers.length > 0 && (
+                            <div className="participating-members">
+                              <span className="members-label">
+                                Membres de l'équipe :
+                              </span>
+                              <div className="members-tags">
+                                {participatingMembers.map((member) => (
+                                  <span key={member._id} className="member-tag">
+                                    {member.firstName} {member.lastName}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                </div>
+              ) : (
+                <p className="no-projects-text">
+                  Aucun projet de groupe pour le moment.
+                </p>
+              )}
+            </div>
+
+            <div className="card main-info-card danger-zone">
+              <div className="danger-content">
+                <div>
+                  <h4 className="danger-title">Quitter l'escouade</h4>
+                  <p className="danger-subtitle">
+                    Vous perdrez l'accès aux points de groupe et aux projets
+                    d'équipe.
+                  </p>
+                </div>
+                <button
+                  onClick={handleLeaveTeam}
+                  className="btn-danger-outline"
+                >
+                  Quitter
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </main>
 
       {/* Edit Modal */}
       {showEditModal && (
         <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
-          <div className="modal-content glass-card" onClick={e => e.stopPropagation()}>
+          <div
+            className="modal-content glass-card"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="modal-header">
               <h2>Réglages de l'Équipe</h2>
-              <button className="close-btn" onClick={() => setShowEditModal(false)}>×</button>
+              <button
+                className="close-btn"
+                onClick={() => setShowEditModal(false)}
+              >
+                ×
+              </button>
             </div>
             <form onSubmit={handleUpdateTeam} className="modal-body">
-               <div className="form-group">
-                  <label>Nom</label>
-                  <input type="text" value={editForm.name} onChange={e => setEditForm({...editForm, name: e.target.value})} required />
-               </div>
-               <div className="form-group">
-                  <label>Slogan</label>
-                  <input type="text" value={editForm.slogan} onChange={e => setEditForm({...editForm, slogan: e.target.value})} />
-               </div>
-               <div className="form-group">
-                  <label>Description / Mission</label>
-                  <textarea value={editForm.description} onChange={e => setEditForm({...editForm, description: e.target.value})} />
-               </div>
-               <button type="submit" disabled={isSubmitting} className="btn-primary full-width">Sauvegarder les modifications</button>
+              <div className="form-group">
+                <label>Nom</label>
+                <input
+                  type="text"
+                  value={editForm.name}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, name: e.target.value })
+                  }
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Slogan</label>
+                <input
+                  type="text"
+                  value={editForm.slogan}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, slogan: e.target.value })
+                  }
+                />
+              </div>
+              <div className="form-group">
+                <label>Description / Mission</label>
+                <textarea
+                  value={editForm.description}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, description: e.target.value })
+                  }
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="btn-primary full-width"
+              >
+                Sauvegarder les modifications
+              </button>
             </form>
           </div>
         </div>
@@ -447,18 +758,41 @@ const Team = () => {
 
       {/* Add Member Modal */}
       {showAddMemberModal && (
-        <div className="modal-overlay" onClick={() => setShowAddMemberModal(false)}>
-          <div className="modal-content glass-card" onClick={e => e.stopPropagation()}>
+        <div
+          className="modal-overlay"
+          onClick={() => setShowAddMemberModal(false)}
+        >
+          <div
+            className="modal-content glass-card"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="modal-header">
               <h2>Recruter un membre</h2>
-              <button className="close-btn" onClick={() => setShowAddMemberModal(false)}>×</button>
+              <button
+                className="close-btn"
+                onClick={() => setShowAddMemberModal(false)}
+              >
+                ×
+              </button>
             </div>
             <form onSubmit={handleAddMember} className="modal-body">
-               <div className="form-group">
-                  <label>Email ou Nom d'utilisateur</label>
-                  <input type="text" value={addMemberInput} onChange={e => setAddMemberInput(e.target.value)} required placeholder="Ex: jean@test.com" />
-               </div>
-               <button type="submit" disabled={isSubmitting} className="btn-primary full-width">Envoyer l'ordre d'intégration</button>
+              <div className="form-group">
+                <label>Email ou Nom d'utilisateur</label>
+                <input
+                  type="text"
+                  value={addMemberInput}
+                  onChange={(e) => setAddMemberInput(e.target.value)}
+                  required
+                  placeholder="Ex: jean@test.com"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="btn-primary full-width"
+              >
+                Envoyer l'ordre d'intégration
+              </button>
             </form>
           </div>
         </div>

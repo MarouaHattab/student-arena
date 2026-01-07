@@ -2,44 +2,43 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-// Générer un token JWT
+// generate token
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRE || '7d'
+    expiresIn: process.env.JWT_EXPIRE
   });
 };
 
-// @desc    Inscription d'un utilisateur
-// @route   POST /api/auth/register
-// @access  Public
+// register
+//POST /api/auth/register
 const register = async (req, res) => {
   try {
     const { firstName, lastName, email, password, userName } = req.body;
 
-    // Vérifier si l'utilisateur existe déjà
+    // verifier si l'utilisateur existe deja
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: 'Cet email est déjà utilisé' });
     }
 
-    // Vérifier si le nom d'utilisateur existe déjà
+    // verifier si le nom d'utilisateur existe deja
     const userNameExists = await User.findOne({ userName });
     if (userNameExists) {
       return res.status(400).json({ message: 'Ce nom d\'utilisateur est déjà pris' });
     }
 
-    // Déterminer le rôle de l'utilisateur
-    // Premier utilisateur devient admin automatiquement
+    // determine user role
+    // first user becomes admin automatically
     let role = 'user';
     const userCount = await User.countDocuments();
     if (userCount === 0) {
       role = 'admin';
     }
 
-    // Hasher le mot de passe
+    // hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Créer l'utilisateur
+    // create user
     const user = await User.create({
       firstName,
       lastName,
@@ -65,7 +64,7 @@ const register = async (req, res) => {
         token: generateToken(user._id)
       });
     } else {
-      res.status(400).json({ message: 'Données utilisateur invalides' });
+      res.status(400).json({ message: 'Donnees utilisateur invalides' });
     }
   } catch (error) {
     console.error(error);
@@ -73,14 +72,13 @@ const register = async (req, res) => {
   }
 };
 
-// @desc    Connexion d'un utilisateur
-// @route   POST /api/auth/login
-// @access  Public
+// login
+//POST /api/auth/login
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Vérifier si l'utilisateur existe
+    // verifier si l'utilisateur existe
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ message: 'Email ou mot de passe incorrect' });
@@ -112,9 +110,8 @@ const login = async (req, res) => {
   }
 };
 
-// @desc    Déconnexion d'un utilisateur
-// @route   POST /api/auth/logout
-// @access  Private
+// logout
+//POST /api/auth/logout
 const logout = async (req, res) => {
   try {
     // Côté serveur, on ne peut pas invalider un JWT
@@ -126,9 +123,8 @@ const logout = async (req, res) => {
   }
 };
 
-// @desc    Obtenir le profil de l'utilisateur connecté
-// @route   GET /api/auth/me
-// @access  Private
+// get me
+//GET /api/auth/me
 const getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user._id)
@@ -143,9 +139,8 @@ const getMe = async (req, res) => {
   }
 };
 
-// @desc    Rafraîchir le token
-// @route   POST /api/auth/refresh-token
-// @access  Private
+// refresh token
+//POST /api/auth/refresh-token
 const refreshToken = async (req, res) => {
   try {
     const token = generateToken(req.user._id);

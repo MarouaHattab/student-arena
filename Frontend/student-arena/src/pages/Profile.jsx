@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axiosConfig";
 import Navbar from "../components/Navbar";
+import { validateChangePassword, hasErrors } from "../utils/validation";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -115,8 +116,12 @@ const Profile = () => {
 
   const handlePasswordChange = async (e) => {
     e.preventDefault();
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert("Les nouveaux mots de passe ne correspondent pas");
+    
+    const errors = validateChangePassword(passwordData);
+    if (hasErrors(errors)) {
+      // On affiche le premier message d'erreur pour rester simple
+      const errorMessages = Object.values(errors);
+      alert(errorMessages[0]);
       return;
     }
 

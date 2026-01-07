@@ -1,6 +1,6 @@
 const { body, param, validationResult } = require('express-validator');
 
-// Middleware pour gérer les erreurs de validation
+// middleware pour gerer les erreurs de validation
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -15,19 +15,19 @@ const handleValidationErrors = (req, res, next) => {
   next();
 };
 
-// ==================== AUTH VALIDATIONS ====================
+// *********************** auth validations *****************************
 
 const validateRegister = [
   body('firstName')
     .trim()
     .notEmpty().withMessage('Le prénom est requis')
-    .isLength({ min: 2, max: 50 }).withMessage('Le prénom doit contenir entre 2 et 50 caractères')
-    .matches(/^[a-zA-ZÀ-ÿ\s'-]+$/).withMessage('Le prénom contient des caractères invalides'),
+    .isLength({ min: 2, max: 50 }).withMessage('Le prenom doit contenir entre 2 et 50 caracteres')
+    .matches(/^[a-zA-ZÀ-ÿ\s'-]+$/).withMessage('Le prenom contient des caracteres invalides'),
   
   body('lastName')
     .trim()
     .notEmpty().withMessage('Le nom est requis')
-    .isLength({ min: 2, max: 50 }).withMessage('Le nom doit contenir entre 2 et 50 caractères')
+    .isLength({ min: 2, max: 50 }).withMessage('Le nom doit contenir entre 2 et 50 caracteres')
     .matches(/^[a-zA-ZÀ-ÿ\s'-]+$/).withMessage('Le nom contient des caractères invalides'),
   
   body('email')
@@ -62,20 +62,20 @@ const validateLogin = [
   handleValidationErrors
 ];
 
-// ==================== USER VALIDATIONS ====================
+// *********************** user validations *****************************
 
 const validateUpdateUser = [
   body('firstName')
     .optional()
     .trim()
-    .isLength({ min: 2, max: 50 }).withMessage('Le prénom doit contenir entre 2 et 50 caractères')
-    .matches(/^[a-zA-ZÀ-ÿ\s'-]+$/).withMessage('Le prénom contient des caractères invalides'),
+    .isLength({ min: 2, max: 50 }).withMessage('Le prenom doit contenir entre 2 et 50 caractères')
+    .matches(/^[a-zA-ZÀ-ÿ\s'-]+$/).withMessage('Le prenom contient des caracteres invalides'),
   
-  body('lastName')
+  body('lastName')  
     .optional()
     .trim()
     .isLength({ min: 2, max: 50 }).withMessage('Le nom doit contenir entre 2 et 50 caractères')
-    .matches(/^[a-zA-ZÀ-ÿ\s'-]+$/).withMessage('Le nom contient des caractères invalides'),
+    .matches(/^[a-zA-ZÀ-ÿ\s'-]+$/).withMessage('Le nom contient des caracteres invalides'),
   
   body('email')
     .optional()
@@ -104,13 +104,13 @@ const validateChangePassword = [
   handleValidationErrors
 ];
 
-// ==================== TEAM VALIDATIONS ====================
+// *********************** team validations *****************************
 
 const validateCreateTeam = [
   body('name')
     .trim()
-    .notEmpty().withMessage('Le nom de l\'équipe est requis')
-    .isLength({ min: 2, max: 50 }).withMessage('Le nom de l\'équipe doit contenir entre 2 et 50 caractères'),
+    .notEmpty().withMessage('Le nom de l\'equipe est requis')
+    .isLength({ min: 2, max: 50 }).withMessage('Le nom de l\'equipe doit contenir entre 2 et 50 caracteres'),
   
   body('description')
     .optional()
@@ -124,32 +124,32 @@ const validateUpdateTeam = [
   body('name')
     .optional()
     .trim()
-    .isLength({ min: 2, max: 50 }).withMessage('Le nom de l\'équipe doit contenir entre 2 et 50 caractères'),
+    .isLength({ min: 2, max: 50 }).withMessage('Le nom de l\'equipe doit contenir entre 2 et 50 caracteres'),
   
   body('description')
     .optional()
     .trim()
-    .isLength({ max: 500 }).withMessage('La description ne peut pas dépasser 500 caractères'),
+    .isLength({ max: 500 }).withMessage('La description ne peut pas depasser 500 caracteres'),
   
   handleValidationErrors
 ];
 
-// ==================== PROJECT VALIDATIONS ====================
+// *********************** project validations *****************************
 
 const validateCreateProject = [
   body('title')
     .trim()
     .notEmpty().withMessage('Le titre du projet est requis')
-    .isLength({ min: 3, max: 100 }).withMessage('Le titre doit contenir entre 3 et 100 caractères'),
+    .isLength({ min: 3, max: 100 }).withMessage('Le titre doit contenir entre 3 et 100 caracteres'),
   
   body('description')
     .trim()
     .notEmpty().withMessage('La description est requise')
-    .isLength({ min: 10, max: 5000 }).withMessage('La description doit contenir entre 10 et 5000 caractères'),
+    .isLength({ min: 10, max: 5000 }).withMessage('La description doit contenir entre 10 et 5000 caracteres'),
   
   body('startDate')
     .optional()
-    .isISO8601().withMessage('Format de date de début invalide'),
+    .isISO8601().withMessage('Format de date de debut invalide'),
   
   body('endDate')
     .optional()
@@ -157,7 +157,7 @@ const validateCreateProject = [
   
   body('maxTeamSize')
     .optional()
-    .isInt({ min: 1, max: 100 }).withMessage('La taille maximale d\'équipe doit être entre 1 et 100'),
+    .isInt({ min: 1, max: 100 }).withMessage('La taille maximale d\'equipe doit être entre 1 et 100'),
   
   handleValidationErrors
 ];
@@ -184,7 +184,7 @@ const validateUpdateProject = [
   handleValidationErrors
 ];
 
-// ==================== SUBMISSION VALIDATIONS ====================
+// *********************** submission validations *****************************
 
 const validateCreateSubmission = [
   body('projectId')
@@ -222,7 +222,7 @@ const validateUpdateSubmission = [
   handleValidationErrors
 ];
 
-// ==================== INVITATION VALIDATIONS ====================
+// *********************** invitation validations *****************************
 
 const validateCreateInvitation = [
   body('email')
@@ -237,7 +237,7 @@ const validateCreateInvitation = [
   handleValidationErrors
 ];
 
-// ==================== COMMON VALIDATIONS ====================
+// *********************** common validations *****************************
 
 const validateMongoId = [
   param('id')
@@ -248,23 +248,23 @@ const validateMongoId = [
 
 module.exports = {
   handleValidationErrors,
-  // Auth
+  // auth
   validateRegister,
   validateLogin,
-  // User
+  // user
   validateUpdateUser,
   validateChangePassword,
-  // Team
+  // team
   validateCreateTeam,
   validateUpdateTeam,
-  // Project
+  // project
   validateCreateProject,
   validateUpdateProject,
-  // Submission
+  // submission
   validateCreateSubmission,
   validateUpdateSubmission,
-  // Invitation
+  // invitation
   validateCreateInvitation,
-  // Common
+  // common
   validateMongoId
 };

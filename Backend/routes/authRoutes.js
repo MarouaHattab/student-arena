@@ -10,7 +10,7 @@ const {
 const { protect } = require('../middleware/authMiddleware');
 const { validateRegister, validateLogin } = require('../middleware/validationMiddleware');
 
-// Routes
+// ******routes auth ******
 router.post('/register', validateRegister, register);
 router.post('/login', validateLogin, login);
 router.post('/logout', protect, logout);

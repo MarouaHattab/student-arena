@@ -15,7 +15,7 @@ const {
 const { protect, admin } = require('../middleware/authMiddleware');
 const { validateCreateSubmission, validateUpdateSubmission, validateMongoId } = require('../middleware/validationMiddleware');
 
-// Routes protégées utilisateur
+// ******routes submission ******
 router.get('/my-submissions', protect, getMySubmissions);
 router.get('/team/:teamId', protect, getTeamSubmissions);
 router.post('/', protect, validateCreateSubmission, createSubmission);
