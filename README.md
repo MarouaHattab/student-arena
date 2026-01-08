@@ -1,7 +1,7 @@
 # Student Arena
 
 <div align="center">
-  <img src="img/logo.jpg" alt="Student Arena Logo" width="200" height="200" style="border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+  <img src="img/logo.jpg" alt="Student Arena Logo" width="500" height="300" style="border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
   
   **Plateforme de Compétition de Projets pour Étudiants**
   
