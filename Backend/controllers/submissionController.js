@@ -73,6 +73,13 @@ const createSubmission = async (req, res) => {
         return res.status(400).json({ message: 'Votre équipe n\'est pas inscrite à ce projet' });
       }
 
+      // Vérifier si l'équipe a toujours le nombre minimum de membres requis
+      if (team.members.length < team.minMembers) {
+        return res.status(400).json({ 
+          message: `Votre équipe ne contient plus assez de membres pour soumettre ce projet (${team.members.length}/${team.minMembers}). Recrutez un nouveau membre.` 
+        });
+      }
+
       // Vérifier si l'équipe a déjà soumis
       const existingSubmission = await Submission.findOne({
         project: projectId,
