@@ -45,7 +45,7 @@ const Projects = () => {
       setRegistering(projectId);
       await api.post(`/projects/${projectId}/register`);
       await fetchData();
-      alert("Inscription réussie ! 🚀");
+      alert("Inscription réussie !");
     } catch (err) {
       alert(err.response?.data?.message || "Erreur lors de l'inscription");
     } finally {
@@ -122,8 +122,8 @@ const Projects = () => {
                 onChange={(e) => setFilterType(e.target.value)}
               >
                 <option value="">Tous les types</option>
-                <option value="individual">👤 Solo</option>
-                <option value="team">👥 Team</option>
+                <option value="individual">Solo</option>
+                <option value="team">Team</option>
               </select>
             </div>
             <div className="filter-group">
@@ -132,8 +132,8 @@ const Projects = () => {
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
               >
-                <option value="active">🟢 En cours</option>
-                <option value="completed">🔵 Terminé</option>
+                <option value="active">En cours</option>
+                <option value="completed">Terminé</option>
               </select>
             </div>
           </div>
@@ -165,7 +165,7 @@ const Projects = () => {
                     )}
                   </div>
                   <div className="points-pool">
-                    🏆 {project.firstPlacePoints} pts
+                    {project.firstPlacePoints} pts
                   </div>
                 </div>
 
@@ -183,10 +183,10 @@ const Projects = () => {
                 <div className="project-footer">
                   <div className="meta-info">
                     <div className="meta-item">
-                      📅 Finit le {formatDate(project.endDate)}
+                      Finit le {formatDate(project.endDate)}
                     </div>
                     <div className="meta-item">
-                      👥 {project.participants?.length || 0} inscrits
+                      {project.participants?.length || 0} inscrits
                     </div>
                   </div>
 
@@ -220,7 +220,7 @@ const Projects = () => {
           {(activeTab === "all" ? filteredProjects : myProjects).length ===
             0 && (
             <div className="empty-projects">
-              <div className="empty-icon">📂</div>
+              <div className="empty-icon"></div>
               <h3>Aucun projet ici</h3>
               <p>Repassez plus tard pour de nouveaux défis !</p>
             </div>

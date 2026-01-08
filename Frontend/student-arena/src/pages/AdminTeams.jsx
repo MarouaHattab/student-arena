@@ -143,9 +143,7 @@ const AdminTeams = () => {
                 <tr key={team._id}>
                   <td>
                     <div className="team-info-cell">
-                      <div className="team-icon-box">
-                        {team.name.charAt(0).toUpperCase()}
-                      </div>
+
                       <div>
                         <div className="team-name-bold">{team.name}</div>
                         <div className="team-slogan-sub">{team.slogan || "Aucun slogan"}</div>
@@ -248,9 +246,7 @@ const AdminTeams = () => {
               <div className="member-list-grid">
                 {selectedTeam?.members?.map(member => (
                   <div key={member._id} className="member-card-small">
-                    <div className="member-avatar-mini">
-                        {member.userName.charAt(0).toUpperCase()}
-                    </div>
+
                     <div className="member-meta">
                       <strong>{member.firstName} {member.lastName}</strong>
                       <span>@{member.userName}</span>

@@ -221,11 +221,11 @@ const ProjectDetails = () => {
                     style={styles.aiSummaryBtn}
                     disabled={loadingSummary}
                   >
-                    {loadingSummary ? "Analyse IA en cours..." : "Générer un résumé intelligent ✨"}
+                    {loadingSummary ? "Analyse IA en cours..." : "Générer un résumé intelligent"}
                   </button>
                 ) : (
                   <div style={styles.aiSummaryBox}>
-                    <h3 style={styles.aiSummaryTitle}>Résumé Intelligent ✨</h3>
+                    <h3 style={styles.aiSummaryTitle}>Résumé Intelligent</h3>
                     <p style={styles.aiSummaryText}>{aiSummary.summary}</p>
                     
                     <div style={styles.aiSummaryFeatures}>

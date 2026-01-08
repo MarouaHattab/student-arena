@@ -136,7 +136,7 @@ const GenerateIdea = () => {
               </div>
 
               <button type="submit" style={styles.generateBtn} disabled={loading}>
-                {loading ? "Génération en cours..." : "Générer mon idée ✨"}
+                {loading ? "Génération en cours..." : "Générer mon idée"}
               </button>
             </form>
           </div>
@@ -188,14 +188,14 @@ const GenerateIdea = () => {
                   
                   {user?.role === 'admin' && (
                     <button onClick={handleUseIdea} style={styles.useIdeaBtn}>
-                      Utiliser pour un projet 🚀
+                      Utiliser pour un projet
                     </button>
                   )}
                 </div>
               </div>
             ) : (
               <div style={styles.emptyState}>
-                <div style={styles.emptyIcon}>💡</div>
+                <div style={styles.emptyIcon}></div>
                 <p>Entrez un thème pour voir apparaître une proposition complète de projet ici.</p>
               </div>
             )}

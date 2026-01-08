@@ -18,7 +18,7 @@ const TEAM_STYLES = `
   /* Dashboard Header */
   .team-dash-header { display: flex; justify-content: space-between; align-items: center; padding: 32px; margin-bottom: 32px; background: #fff; }
   .team-info-main { display: flex; gap: 24px; align-items: center; }
-  .team-large-avatar { width: 90px; height: 90px; background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); border-radius: 24px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 42px; font-weight: 800; box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2); }
+  .team-large-avatar { display: none; }
   .team-title { font-size: 32px; font-weight: 800; color: #1e293b; margin: 0; letter-spacing: -1px; }
   .team-slogan { font-size: 16px; color: #64748b; font-style: italic; margin-top: 4px; }
   .team-meta-pills { display: flex; gap: 12px; margin-top: 16px; }
@@ -325,7 +325,7 @@ const Team = () => {
         <Navbar />
         <main className="page-container">
           <div className="no-team-hero card premium-shadow fade-in">
-            <div className="no-team-icon">🛡️</div>
+            <div className="no-team-icon"></div>
             <h1 className="no-team-title">Rejoignez l'élite</h1>
             <p className="no-team-text">
               Pour participer aux projets d'envergure, vous avez besoin d'une
@@ -467,7 +467,6 @@ const Team = () => {
         <div className="team-dash-header card premium-shadow">
           <div className="team-info-main">
             <div className="team-large-avatar">
-              {team.name?.charAt(0)?.toUpperCase()}
             </div>
             <div className="team-text-meta">
               <h1 className="team-title">{team.name}</h1>
@@ -476,9 +475,9 @@ const Team = () => {
               </p>
               <div className="team-meta-pills">
                 <span className="meta-pill">
-                  👥 {team.members?.length} membres
+                  {team.members?.length} membres
                 </span>
-                <span className="meta-pill">🏆 {team.points} points</span>
+                <span className="meta-pill"> {team.points} points</span>
                 <span className={`status-pill ${team.status}`}>
                   {team.status}
                 </span>
@@ -491,13 +490,13 @@ const Team = () => {
                 onClick={() => setShowEditModal(true)}
                 className="btn-icon-edit-large"
               >
-                ⚙️
+                Modifier
               </button>
               <button
                 onClick={handleDeleteTeam}
                 className="btn-icon-delete-large"
               >
-                🗑️
+                Supprimer
               </button>
             </div>
           )}
@@ -569,7 +568,7 @@ const Team = () => {
                             className="btn-control-mini"
                             title="Modifier rang"
                           >
-                            👑
+                            Admin
                           </button>
                           <button
                             onClick={() =>
@@ -578,7 +577,7 @@ const Team = () => {
                             className="btn-control-mini danger"
                             title="Exclure"
                           >
-                            ✖
+                            Exclure
                           </button>
                         </div>
                       )}
@@ -642,9 +641,9 @@ const Team = () => {
                               className={`project-status-badge ${project.status}`}
                             >
                               {project.status === "active"
-                                ? "🟢 En cours"
+                                ? "En cours"
                                 : project.status === "completed"
-                                ? "🔵 Terminé"
+                                ? "Terminé"
                                 : project.status}
                             </span>
                           </div>

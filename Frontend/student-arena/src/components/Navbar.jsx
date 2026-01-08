@@ -47,7 +47,7 @@ const Navbar = () => {
     <header style={styles.header}>
       <div style={styles.headerContent}>
         <div style={styles.brand} onClick={() => handleNavigate("/")}>
-          <div style={styles.logoBadge}>SA</div>
+
           <h1 style={styles.logoText}>Student Arena</h1>
         </div>
 
@@ -84,13 +84,13 @@ const Navbar = () => {
               onClick={() => handleNavigate("/ai/chat")} 
               style={{...styles.aiBtn, ...(isActive("/ai/chat") ? styles.aiBtnActive : {})}}
             >
-              ✨ Assistant
+              Assistant
             </button>
             <button 
               onClick={() => handleNavigate("/ai/generate-idea")} 
               style={{...styles.aiBtn, ...(isActive("/ai/generate-idea") ? styles.aiBtnActive : {})}}
             >
-              💡 Idées
+              Idées
             </button>
           </div>
 
@@ -110,7 +110,7 @@ const Navbar = () => {
                     ...(showAdminMenu ? styles.adminMenuBtnOpen : {})
                   }}
                 >
-                  ⚙️ Admin
+                  Admin
                 </button>
                 {showAdminMenu && (
                   <div style={styles.dropdownMenu}>
@@ -133,9 +133,7 @@ const Navbar = () => {
               style={styles.profileIndicator}
               onClick={() => handleNavigate("/profile")}
             >
-              <div style={styles.avatar}>
-                {user?.userName?.charAt(0).toUpperCase() || 'U'}
-              </div>
+
               <div style={styles.userInfo}>
                 <span style={styles.userName}>{user?.userName}</span>
                 <span style={styles.userRole}>{user?.role}</span>

@@ -32,7 +32,7 @@ const Register = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); //no reload 
     if (formData.password !== formData.confirmPassword) {
       setValidationErrors({
         confirmPassword: "Les mots de passe ne correspondent pas",
@@ -67,7 +67,7 @@ const Register = () => {
 
       <div style={styles.card} className="fade-in">
         <div style={styles.header}>
-            <div style={styles.logoBadge}>SA</div>
+
             <h1 style={styles.title}>Rejoignez l'Arena</h1>
             <p style={styles.subtitle}>Créez votre compte en quelques secondes et commencez à monter dans le classement.</p>
         </div>
@@ -81,7 +81,7 @@ const Register = () => {
               <input
                 type="text"
                 name="firstName"
-                placeholder="Ex: Sophie"
+                placeholder="Ex: Maroua"
                 value={formData.firstName}
                 onChange={handleChange}
                 style={{
@@ -99,7 +99,7 @@ const Register = () => {
               <input
                 type="text"
                 name="lastName"
-                placeholder="Ex: Martin"
+                placeholder="Ex: Hattab"
                 value={formData.lastName}
                 onChange={handleChange}
                 style={{
@@ -116,15 +116,14 @@ const Register = () => {
           <div style={styles.inputGroup}>
             <label style={styles.label}>Nom d'utilisateur</label>
             <div style={styles.inputWrapper}>
-              <span style={styles.inputIcon}>👤</span>
               <input
                 type="text"
                 name="userName"
-                placeholder="sophie_dev"
+                placeholder="maroua_hattab"
                 value={formData.userName}
                 onChange={handleChange}
                 style={{
-                  ...styles.inputWithIcon,
+                  ...styles.input,
                   ...(validationErrors.userName ? styles.inputError : {}),
                 }}
               />
@@ -137,15 +136,14 @@ const Register = () => {
           <div style={styles.inputGroup}>
             <label style={styles.label}>Email professionnel / étudiant</label>
             <div style={styles.inputWrapper}>
-              <span style={styles.inputIcon}>📧</span>
               <input
                 type="email"
                 name="email"
-                placeholder="sophie@exemple.com"
+                placeholder="marouahattab3@gmail.com"
                 value={formData.email}
                 onChange={handleChange}
                 style={{
-                  ...styles.inputWithIcon,
+                  ...styles.input,
                   ...(validationErrors.email ? styles.inputError : {}),
                 }}
               />

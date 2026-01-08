@@ -77,7 +77,7 @@ const Home = () => {
                 style={styles.secondaryHeroBtn}
                 className="hover-btn-secondary"
               >
-                ✨ Voir Recommandations
+                Voir Recommandations
               </button>
             </div>
           </div>
@@ -101,7 +101,7 @@ const Home = () => {
             <div style={styles.sectionHeader}>
               <div style={styles.sectionTitleRow}>
                 <h2 style={styles.sectionTitle}>
-                  <span style={styles.aiIcon}>✨</span> Sélection IA pour vous
+                  Sélection IA pour vous
                 </h2>
                 <button 
                   onClick={fetchRecommendations} 
@@ -109,7 +109,7 @@ const Home = () => {
                   title="Actualiser"
                   className="refresh-btn-hover"
                 >
-                  🔄
+                  Actualiser
                 </button>
               </div>
               <p style={styles.sectionSubtitle}>Algorithme d'analyse prédictive basé sur votre profil</p>
@@ -132,7 +132,7 @@ const Home = () => {
                     </div>
                     <div style={styles.recMeta}>
                       <span style={styles.recTypeBadge}>
-                        {rec.project?.type === 'team' ? '👥 Équipe' : '👤 Solo'}
+                        {rec.project?.type === 'team' ? 'Équipe' : 'Solo'}
                       </span>
                       <span style={styles.recDifficulty}>
                         {rec.project?.difficulty || 'Intermédiaire'}
@@ -165,21 +165,18 @@ const Home = () => {
         {/* Quick Access Grid */}
         <div style={styles.quickGrid}>
           <div style={styles.quickCard} className="quick-access-hover" onClick={() => navigate("/leaderboard")}>
-            <div style={styles.quickIcon}>🏆</div>
             <div style={styles.quickInfo}>
               <h4>Leaderboard</h4>
               <p>Où vous situez-vous ?</p>
             </div>
           </div>
           <div style={styles.quickCard} className="quick-access-hover" onClick={() => navigate("/team")}>
-            <div style={styles.quickIcon}>👥</div>
             <div style={styles.quickInfo}>
               <h4>Mon Équipe</h4>
               <p>Gérez vos coéquipiers</p>
             </div>
           </div>
           <div style={styles.quickCard} className="quick-access-hover" onClick={() => navigate("/ai/chat")}>
-            <div style={styles.quickIcon}>🤖</div>
             <div style={styles.quickInfo}>
               <h4>Assistant IA</h4>
               <p>Besoin d'aide ?</p>
@@ -253,20 +250,16 @@ const styles = {
   },
   heroBanner: {
     position: "relative",
-    background: "linear-gradient(135deg, #1e293b 0%, #334155 100%)",
+    background: "#fff",
     borderRadius: "24px",
     padding: "60px 40px",
     overflow: "hidden",
     marginBottom: "40px",
-    boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
+    border: "1px solid #e2e8f0",
+    boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)",
   },
   heroOverlay: {
-    position: "absolute",
-    top: 0,
-    right: 0,
-    width: "40%",
-    height: "100%",
-    background: "radial-gradient(circle at center, rgba(99, 102, 241, 0.15) 0%, transparent 70%)",
+    display: "none",
   },
   heroContentEnhanced: {
     position: "relative",
@@ -276,30 +269,27 @@ const styles = {
   welcomeBadge: {
     display: "inline-block",
     padding: "6px 12px",
-    background: "rgba(99, 102, 241, 0.2)",
-    color: "#a5b4fc",
+    background: "#f1f5f9",
+    color: "#64748b",
     borderRadius: "8px",
     fontSize: "12px",
     fontWeight: "700",
     textTransform: "uppercase",
     marginBottom: "16px",
-    border: "1px solid rgba(99, 102, 241, 0.3)",
   },
   heroMainTitle: {
     fontSize: "42px",
     fontWeight: "800",
-    color: "#fff",
+    color: "#1e293b",
     margin: "0 0 16px 0",
     lineHeight: "1.1",
   },
   highlightText: {
-    background: "linear-gradient(to right, #818cf8, #c084fc)",
-    WebkitBackgroundClip: "text",
-    WebkitTextFillColor: "transparent",
+    color: "#6366f1",
   },
   heroSubText: {
     fontSize: "18px",
-    color: "#94a3b8",
+    color: "#64748b",
     lineHeight: "1.6",
     marginBottom: "32px",
   },
@@ -321,28 +311,27 @@ const styles = {
   },
   secondaryHeroBtn: {
     padding: "14px 28px",
-    background: "rgba(255, 255, 255, 0.1)",
-    color: "#fff",
-    border: "1px solid rgba(255, 255, 255, 0.2)",
+    background: "#fff",
+    color: "#475569",
+    border: "1px solid #e2e8f0",
     borderRadius: "12px",
     fontWeight: "600",
     fontSize: "15px",
     cursor: "pointer",
-    backdropFilter: "blur(10px)",
     transition: "all 0.2s",
   },
   heroStatsCard: {
     position: "absolute",
     right: "40px",
     bottom: "40px",
-    background: "rgba(255, 255, 255, 0.05)",
-    backdropFilter: "blur(10px)",
+    background: "#fff",
     padding: "20px 30px",
     borderRadius: "20px",
-    border: "1px solid rgba(255, 255, 255, 0.1)",
+    border: "1px solid #e2e8f0",
     display: "flex",
     gap: "30px",
     zIndex: 1,
+    boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.05)",
   },
   miniStat: {
     display: "flex",
@@ -352,17 +341,17 @@ const styles = {
   miniStatVal: {
     fontSize: "24px",
     fontWeight: "800",
-    color: "#fff",
+    color: "#1e293b",
   },
   miniStatLabel: {
     fontSize: "11px",
-    color: "#94a3b8",
+    color: "#64748b",
     textTransform: "uppercase",
     fontWeight: "700",
   },
   miniStatDivider: {
     width: "1px",
-    background: "rgba(255, 255, 255, 0.1)",
+    background: "#e2e8f0",
   },
   section: {
     marginBottom: "40px",
@@ -394,13 +383,16 @@ const styles = {
     background: "#fff",
     border: "1px solid #e2e8f0",
     borderRadius: "8px",
-    width: "36px",
     height: "36px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     cursor: "pointer",
     transition: "all 0.2s",
+    padding: "0 12px",
+    width: "auto",
+    fontSize: "13px",
+    fontWeight: "600",
   },
   recGrid: {
     display: "grid",

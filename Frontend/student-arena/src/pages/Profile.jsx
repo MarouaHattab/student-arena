@@ -172,13 +172,6 @@ const Profile = () => {
         {/* Profile Header Card */}
         <div style={styles.profileHeader}>
           <div style={styles.avatarContainer}>
-            <div style={styles.avatar}>
-              {profile?.firstName?.charAt(0)?.toUpperCase() || "U"}
-              {profile?.lastName?.charAt(0)?.toUpperCase() || ""}
-            </div>
-            <div style={styles.statusBadge}>
-              {profile?.role === "admin" ? "Admin" : "Membre"}
-            </div>
           </div>
           
           <div style={styles.profileInfo}>
@@ -300,7 +293,7 @@ const Profile = () => {
               {profile?.team ? (
                 <>
                   <div style={styles.teamInfo}>
-                    <div style={styles.teamIcon}>T</div>
+                    <div style={styles.teamIcon}></div>
                     <div>
                       <p style={styles.teamName}>{profile.team.name}</p>
                       <p style={styles.teamRole}>
@@ -314,7 +307,7 @@ const Profile = () => {
                 </>
               ) : (
                 <div style={styles.noTeam}>
-                  <div style={styles.noTeamIcon}>?</div>
+                  <div style={styles.noTeamIcon}></div>
                   <p style={styles.noTeamText}>Vous n'êtes membre d'aucune équipe</p>
                   <button onClick={() => navigate("/team")} style={styles.joinTeamBtn}>Rejoindre une équipe</button>
                 </div>
@@ -524,27 +517,19 @@ const Profile = () => {
 const styles = {
   container: {
     minHeight: "100vh",
-    backgroundColor: "#f8fafc",
+    backgroundColor: "white",
+    fontFamily: "Arial, sans-serif",
   },
   loadingContainer: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    height: "100vh",
+    padding: "50px",
+    textAlign: "center",
   },
   spinner: {
-    width: "40px",
-    height: "40px",
-    border: "3px solid #e2e8f0",
-    borderTop: "3px solid #6366f1",
-    borderRadius: "50%",
-    animation: "spin 1s linear infinite",
+    fontSize: "20px",
+    color: "purple",
   },
   loadingText: {
-    color: "#64748b",
-    marginTop: "16px",
-    fontSize: "16px",
+    color: "black",
   },
   errorContainer: {
     display: "flex",
@@ -767,16 +752,7 @@ const styles = {
     borderRadius: "8px",
   },
   teamIcon: {
-    width: "40px",
-    height: "40px",
-    background: "#6366f1",
-    color: "#fff",
-    borderRadius: "8px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "18px",
-    fontWeight: "bold",
+    display: "none",
   },
   teamName: {
     fontSize: "16px",
@@ -800,17 +776,7 @@ const styles = {
     padding: "20px",
   },
   noTeamIcon: {
-    width: "48px",
-    height: "48px",
-    background: "#f1f5f9",
-    color: "#94a3b8",
-    borderRadius: "50%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "24px",
-    fontWeight: "bold",
-    margin: "0 auto 12px",
+    display: "none",
   },
   noTeamText: {
     color: "#64748b",

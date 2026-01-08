@@ -61,7 +61,7 @@ const ChatAssistant = () => {
         <div style={styles.chatCard}>
           <div style={styles.chatHeader}>
             <div style={styles.botInfo}>
-              <div style={styles.botAvatar}>✨</div>
+              <div style={styles.botAvatar}></div>
               <div>
                 <h2 style={styles.botName}>Assistant Student Arena</h2>
                 <div style={styles.botStatus}>
@@ -187,15 +187,9 @@ const styles = {
     gap: "12px",
   },
   botAvatar: {
-    width: "44px",
-    height: "44px",
-    background: "linear-gradient(135deg, #6366f1 0%, #a855f7 100%)",
-    borderRadius: "12px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "20px",
-    color: "#fff",
+    width: "0px",
+    height: "0px",
+    display: "none",
   },
   botName: {
     fontSize: "16px",

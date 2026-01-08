@@ -154,9 +154,7 @@ const AdminUsers = () => {
                 <tr key={user._id}>
                   <td>
                     <div className="user-info-cell">
-                      <div className="user-avatar-small">
-                        {user.userName.charAt(0).toUpperCase()}
-                      </div>
+
                       <div>
                         <div className="user-name-bold">{user.firstName} {user.lastName}</div>
                         <div className="user-email-sub">{user.email}</div>

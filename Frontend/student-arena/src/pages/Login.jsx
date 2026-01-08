@@ -55,7 +55,7 @@ const Login = () => {
       
       <div style={styles.card} className="fade-in">
         <div style={styles.header}>
-            <div style={styles.logoBadge}>SA</div>
+
             <h1 style={styles.title}>Student Arena</h1>
             <p style={styles.subtitle}>Ravis de vous revoir ! Connectez-vous pour continuer l'aventure.</p>
         </div>
@@ -66,11 +66,10 @@ const Login = () => {
           <div style={styles.inputGroup}>
             <label style={styles.label}>Adresse Email</label>
             <div style={styles.inputWrapper}>
-              <span style={styles.inputIcon}>📧</span>
               <input
                 type="email"
                 name="email"
-                placeholder="nom@exemple.com"
+                placeholder="marouahattab3@gmail.com"
                 value={formData.email}
                 onChange={handleChange}
                 style={{
@@ -87,7 +86,6 @@ const Login = () => {
           <div style={styles.inputGroup}>
             <label style={styles.label}>Mot de passe</label>
             <div style={styles.inputWrapper}>
-              <span style={styles.inputIcon}>🔒</span>
               <input
                 type="password"
                 name="password"
@@ -227,7 +225,7 @@ const styles = {
   },
   input: {
     width: "100%",
-    padding: "14px 14px 14px 44px",
+    padding: "14px 16px",
     background: "#fff",
     border: "1px solid #e2e8f0",
     borderRadius: "14px",

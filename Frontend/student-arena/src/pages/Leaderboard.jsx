@@ -38,9 +38,6 @@ const Leaderboard = () => {
   };
 
   const getRankEmoji = (index) => {
-    if (index === 0) return "🥇";
-    if (index === 1) return "🥈";
-    if (index === 2) return "🥉";
     return `#${index + 1}`;
   };
 
@@ -61,7 +58,7 @@ const Leaderboard = () => {
               ...(activeTab === "students" ? styles.activeTab : {})
             }}
           >
-            👤 Étudiants
+            Étudiants
           </button>
           <button 
             onClick={() => setActiveTab("teams")}
@@ -70,7 +67,7 @@ const Leaderboard = () => {
               ...(activeTab === "teams" ? styles.activeTab : {})
             }}
           >
-            👥 Équipes
+            Équipes
           </button>
         </div>
 
@@ -96,7 +93,7 @@ const Leaderboard = () => {
                   {students.map((student, index) => (
                     <tr key={student._id} style={styles.tr}>
                       <td style={styles.td}>
-                        <div style={{...styles.rankBadge, ...getRankStyle(index)}}>
+                        <div style={styles.rankNumber}>
                           {getRankEmoji(index)}
                         </div>
                       </td>
@@ -127,7 +124,7 @@ const Leaderboard = () => {
                   {teams.map((team, index) => (
                     <tr key={team._id} style={styles.tr}>
                       <td style={styles.td}>
-                        <div style={{...styles.rankBadge, ...getRankStyle(index)}}>
+                        <div style={styles.rankNumber}>
                           {getRankEmoji(index)}
                         </div>
                       </td>
@@ -138,15 +135,9 @@ const Leaderboard = () => {
                         </div>
                       </td>
                       <td style={styles.td}>
-                        <div style={styles.memberAvatars}>
-                          {team.members?.slice(0, 3).map((m, i) => (
-                            <div key={i} style={styles.miniAvatar} title={m.userName}>
-                              {m.firstName[0]}
-                            </div>
-                          ))}
-                          {team.members?.length > 3 && (
-                            <div style={styles.moreMembers}>+{team.members.length - 3}</div>
-                          )}
+                        <div style={{ fontSize: "13px", color: "#475569" }}>
+                          {team.members?.map(m => m.firstName).slice(0, 3).join(", ")}
+                          {team.members?.length > 3 && "..."}
                         </div>
                       </td>
                       <td style={styles.td}>
@@ -249,15 +240,10 @@ const styles = {
     fontSize: "14px",
     color: "#1e293b",
   },
-  rankBadge: {
-    width: "40px",
-    height: "40px",
-    borderRadius: "12px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
+  rankNumber: {
+    fontSize: "16px",
     fontWeight: "800",
-    fontSize: "14px",
+    color: "#64748b",
   },
   userInfo: {
     display: "flex",
@@ -308,20 +294,7 @@ const styles = {
     display: "flex",
     alignItems: "center",
   },
-  miniAvatar: {
-    width: "28px",
-    height: "28px",
-    borderRadius: "50%",
-    backgroundColor: "#6366f1",
-    color: "white",
-    fontSize: "10px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontWeight: "bold",
-    border: "2px solid white",
-    marginLeft: "-8px",
-  },
+  miniAvatar: { display: "none" },
   moreMembers: {
     fontSize: "11px",
     color: "#64748b",

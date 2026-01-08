@@ -22,10 +22,10 @@ const NotFound = () => {
           
           <div style={styles.actionButtons}>
             <button onClick={() => navigate(-1)} style={styles.secondaryBtn}>
-              ⬅️ Retourner en arrière
+              Retourner en arrière
             </button>
             <button onClick={() => navigate("/")} style={styles.primaryBtn}>
-              🏠 Retourner à l'accueil
+              Retourner à l'accueil
             </button>
           </div>
         </div>
