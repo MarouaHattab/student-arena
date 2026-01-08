@@ -11,7 +11,9 @@
   [![AI](https://img.shields.io/badge/AI-Google%20Gemini-orange.svg)](https://ai.google.dev/)
 
   <br/>
-  <h3>🎥 <a href="https://drive.google.com/file/d/1fv_s8S1hA-2moZWUIk4YX7g1N3uBoLXR/view?usp=sharing">Voir la Démo du Projet</a></h3>
+  <!-- <h3>🎥 <a href="https://drive.google.com/file/d/1fv_s8S1hA-2moZWUIk4YX7g1N3uBoLXR/view?usp=sharing">Voir la Démo du Projet</a></h3> -->
+  [Voir la Démo du Projet](img/demo.mp4)
+
 </div>
 
 ---
