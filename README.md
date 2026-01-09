@@ -3,7 +3,7 @@
 <div align="center">
   <img src="img/logo.jpg" alt="Student Arena Logo" width="500" height="300" style="border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
   
-  **Plateforme de Compétition de Projets pour Étudiants**
+  **Student Project Competition Platform**
   
   [![React](https://img.shields.io/badge/React-19.2.0-blue.svg)](https://reactjs.org/)
   [![Node.js](https://img.shields.io/badge/Node.js-Express-green.svg)](https://nodejs.org/)
@@ -12,559 +12,559 @@
 
   <br/>
 
-  <h3>🎥 <a href="https://drive.google.com/file/d/1fv_s8S1hA-2moZWUIk4YX7g1N3uBoLXR/view?usp=sharing">Voir la Démo du Projet</a></h3
+  <h3>🎥 <a href="https://drive.google.com/file/d/1fv_s8S1hA-2moZWUIk4YX7g1N3uBoLXR/view?usp=sharing">Watch Project Demo</a></h3>
 
 </div>
 
 ---
 
-## Table des Matières
+## Table of Contents
 
-- [À Propos](#à-propos)
-- [Fonctionnalités](#fonctionnalités)
-- [Guide d'Utilisation](#guide-dutilisation)
-  - [Pour les Utilisateurs](#pour-les-utilisateurs-étudiants)
-  - [Pour les Administrateurs](#pour-les-administrateurs)
-  - [Pour les Visiteurs](#pour-les-visiteurs-non-connectés)
+- [About](#about)
+- [Features](#features)
+- [User Guide](#user-guide)
+  - [For Users](#for-users-students)
+  - [For Administrators](#for-administrators)
+  - [For Visitors](#for-visitors-not-logged-in)
 - [Installation](#installation)
-- [Architecture Technique](#architecture-technique)
-- [Système de Points](#système-de-points)
-- [Documentation API](#documentation-api)
-- [Structure du Projet](#structure-du-projet)
+- [Technical Architecture](#technical-architecture)
+- [Points System](#points-system)
+- [API Documentation](#api-documentation)
+- [Project Structure](#project-structure)
 
 ---
 
-## À Propos
+## About
 
-**Student Arena** est une plateforme web moderne et dynamique dédiée aux compétitions de projets pour étudiants. Elle permet aux utilisateurs de s'inscrire à des projets (en solo ou en équipe), de soumettre leurs travaux et de grimper dans le classement mondial grâce à un système de points innovant et des fonctionnalités boostées par l'Intelligence Artificielle.
+**Student Arena** is a modern and dynamic web platform dedicated to student project competitions. It allows users to register for projects (solo or in teams), submit their work, and climb the global leaderboard through an innovative points system and features powered by Artificial Intelligence.
 
-La plateforme encourage l'excellence académique, la collaboration en équipe et l'innovation technologique à travers un système de gamification sophistiqué.
-
----
-
-## Fonctionnalités
-
-### Interface Moderne
-
-- Design premium avec effets de glassmorphism
-- Interface responsive (desktop, tablette, mobile)
-- Micro-animations et transitions fluides
-- Thème moderne avec gradients dynamiques
-
-### Intelligence Artificielle (Google Gemini 1.5 Flash)
-
-- **Générateur de Bio** : Création automatique d'une bio professionnelle
-- **Recommandations de Projets** : Suggestions personnalisées basées sur l'historique
-- **Assistant Chatbot** : Aide interactive pour naviguer sur la plateforme
-- **Générateur d'Idées** : Génération d'idées de projets innovantes
-
-### Système de Compétition
-
-- Classements en temps réel (utilisateurs et équipes)
-- Système de points avec bonus pour les équipes
-- Attribution de podiums (1ère, 2ème, 3ème place)
-- Historique des projets terminés
+The platform encourages academic excellence, team collaboration, and technological innovation through a sophisticated gamification system.
 
 ---
 
-## Guide d'Utilisation
+## Features
 
-### Pour les Utilisateurs (Étudiants)
+### Modern Interface
 
-#### Inscription et Connexion
+- Premium design with glassmorphism effects
+- Responsive interface (desktop, tablet, mobile)
+- Smooth micro-animations and transitions
+- Modern theme with dynamic gradients
 
-1. **Créer un Compte**
+### Artificial Intelligence (Google Gemini 1.5 Flash)
 
-   - Accédez à la page d'inscription (`/register`)
-   - Remplissez le formulaire avec :
-     - Prénom et Nom
-     - Email (doit être unique)
-     - Nom d'utilisateur (3-30 caractères, lettres, chiffres et underscores uniquement)
-     - Mot de passe (minimum 8 caractères, avec majuscule, minuscule et chiffre)
-   - Cliquez sur "Créer mon compte"
-   - Vous serez automatiquement connecté
+- **Bio Generator**: Automatic creation of professional bios
+- **Project Recommendations**: Personalized suggestions based on history
+- **Chatbot Assistant**: Interactive help for navigating the platform
+- **Idea Generator**: Generation of innovative project ideas
 
-2. **Se Connecter**
-   - Accédez à la page de connexion (`/login`)
-   - Entrez votre email ou nom d'utilisateur
-   - Entrez votre mot de passe
-   - Cliquez sur "Se connecter"
+### Competition System
 
-#### Gestion du Profil
-
-1. **Accéder au Profil**
-
-   - Cliquez sur votre nom dans la barre de navigation
-   - Ou accédez directement à `/profile`
-
-2. **Modifier le Profil**
-
-   - Cliquez sur le bouton "Modifier" dans votre profil
-   - Vous pouvez modifier :
-     - Prénom et Nom
-     - Nom d'utilisateur
-     - Bio (description personnelle)
-   - Cliquez sur "Sauvegarder"
-
-3. **Générer une Bio avec l'IA**
-
-   - Dans la section "Bio" de votre profil
-   - Cliquez sur "Générer avec l'IA"
-   - L'IA créera une bio professionnelle basée sur vos compétences
-   - Vous pouvez l'accepter ou la modifier
-
-4. **Changer le Mot de Passe**
-   - Dans votre profil, section "Sécurité"
-   - Entrez votre mot de passe actuel
-   - Entrez le nouveau mot de passe (minimum 8 caractères)
-   - Confirmez le nouveau mot de passe
-   - Cliquez sur "Changer le mot de passe"
-
-#### Gestion d'Équipe
-
-1. **Créer une Équipe**
-
-   - Accédez à la page "Équipe" (`/team`)
-   - Cliquez sur "Créer une Équipe"
-   - Remplissez le formulaire :
-     - Nom de l'équipe (2-100 caractères)
-     - Slogan (optionnel)
-     - Description/Mission (optionnel)
-   - Cliquez sur "Lancer l'Équipe"
-   - Vous devenez automatiquement le leader de l'équipe
-
-2. **Rejoindre une Équipe**
-
-   - Option 1 : Via code d'invitation
-     - Cliquez sur "Rejoindre via code"
-     - Entrez le code d'invitation fourni par le leader
-     - Cliquez sur "Vérifier le Code & Entrer"
-   - Option 2 : Être ajouté par un leader
-     - Le leader doit vous ajouter via votre email ou nom d'utilisateur
-
-3. **Inviter des Membres**
-
-   - En tant que leader, accédez à votre équipe
-   - Cliquez sur "+ Ajouter Recrue"
-   - Entrez l'email ou le nom d'utilisateur du membre
-   - Cliquez sur "Envoyer l'ordre d'intégration"
-
-4. **Gérer les Membres**
-
-   - Promouvoir un membre au rang de leader (maximum 2 leaders)
-   - Retirer le leadership d'un membre
-   - Retirer un membre de l'équipe
-
-5. **Quitter une Équipe**
-   - Accédez à votre équipe
-   - Dans la section "Quitter l'escouade"
-   - Cliquez sur "Quitter"
-   - Confirmez votre action
-   - Attention : Si vous êtes le seul leader, vous devez nommer un autre leader avant de partir
-
-#### Participation aux Projets
-
-1. **Explorer les Projets**
-
-   - Accédez à la page "Projets" (`/projects`)
-   - Utilisez les filtres pour :
-     - Type : Solo ou Team
-     - État : En cours ou Terminé
-   - Cliquez sur "Explorer" pour voir les détails d'un projet
-
-2. **S'inscrire à un Projet Individuel**
-
-   - Trouvez un projet de type "Solo"
-   - Cliquez sur "Participer"
-   - Attention : Si vous êtes dans une équipe, seul un membre de votre équipe peut participer à un projet individuel
-
-3. **Inscrire son Équipe à un Projet**
-
-   - Trouvez un projet de type "Team"
-   - Attention : Seul le leader peut inscrire l'équipe
-   - Cliquez sur "Participer"
-   - Votre équipe doit avoir au moins le nombre minimum de membres requis
-
-4. **Voir Mes Projets**
-   - Cliquez sur l'onglet "Mes Inscriptions" dans la page Projets
-   - Vous verrez tous les projets auxquels vous participez (individuellement ou en équipe)
-
-#### Soumettre un Projet
-
-1. **Préparer votre Dépôt GitHub**
-
-   - Créez un dépôt GitHub pour votre projet
-   - Assurez-vous que le dépôt est public ou accessible
-   - Ajoutez un README avec la description du projet
-
-2. **Soumettre le Lien**
-
-   - Accédez à la page de détails du projet (`/projects/:id`)
-   - Faites défiler jusqu'à la section "Soumission"
-   - Entrez le lien de votre dépôt GitHub (format : `https://github.com/username/repo`)
-   - Cliquez sur "Soumettre"
-   - Attention : Vous ne pouvez soumettre qu'une seule fois par projet
-
-3. **Suivre l'État de votre Soumission**
-   - Dans "Mes Inscriptions", vous pouvez voir l'état de vos soumissions :
-     - En attente : En cours d'évaluation
-     - Approuvée : Votre soumission a été acceptée
-     - Rejetée : Votre soumission a été refusée (avec feedback)
-
-#### Consulter les Classements
-
-1. **Classement Global**
-
-   - Accédez à la page "Classement" (`/leaderboard`)
-   - Consultez le top 10 des utilisateurs
-   - Consultez le top 10 des équipes
-
-2. **Classement d'un Projet**
-   - Dans la page de détails d'un projet terminé
-   - Consultez le podium (1ère, 2ème, 3ème place)
-   - Voyez tous les participants classés
-
-#### Utiliser les Fonctionnalités IA
-
-1. **Générer une Bio**
-
-   - Dans votre profil, section "Bio"
-   - Cliquez sur "Générer avec l'IA"
-   - L'IA créera une bio basée sur vos compétences
-
-2. **Obtenir des Recommandations de Projets**
-
-   - Accédez à la page "Assistant IA" (`/chat-assistant`)
-   - Cliquez sur "Recommandations de Projets"
-   - L'IA suggérera des projets adaptés à votre profil
-
-3. **Chatter avec l'Assistant**
-
-   - Accédez à "Assistant IA"
-   - Posez des questions sur la plateforme
-   - L'IA vous aidera à naviguer et comprendre les règles
-
-4. **Générer une Idée de Projet**
-   - Accédez à "Générer une Idée" (`/generate-idea`)
-   - Choisissez un thème (Web, Mobile, IA, etc.)
-   - Choisissez la difficulté (Facile, Moyen, Difficile)
-   - Cliquez sur "Générer"
-   - L'IA créera une idée de projet innovante
+- Real-time leaderboards (users and teams)
+- Points system with team bonuses
+- Podium awards (1st, 2nd, 3rd place)
+- Completed projects history
 
 ---
 
-### Pour les Administrateurs
+## User Guide
 
-#### Accès Administrateur
+### For Users (Students)
 
-1. **Premier Utilisateur = Admin**
+#### Registration and Login
 
-   - Le premier utilisateur à s'inscrire devient automatiquement administrateur
-   - Les utilisateurs suivants sont des utilisateurs normaux
+1. **Create an Account**
 
-2. **Se Connecter en tant qu'Admin**
-   - Connectez-vous normalement avec votre compte admin
-   - Vous verrez un onglet "Admin" dans la navigation
+   - Go to the registration page (`/register`)
+   - Fill out the form with:
+     - First and Last Name
+     - Email (must be unique)
+     - Username (3-30 characters, letters, numbers and underscores only)
+     - Password (minimum 8 characters, with uppercase, lowercase and number)
+   - Click "Create my account"
+   - You will be automatically logged in
 
-#### Gestion des Projets
+2. **Log In**
+   - Go to the login page (`/login`)
+   - Enter your email or username
+   - Enter your password
+   - Click "Log in"
 
-1. **Créer un Projet**
+#### Profile Management
 
-   - Accédez à "Admin" → "Projets"
-   - Cliquez sur "Créer un Projet"
-   - Remplissez le formulaire :
-     - **Titre** : Nom du projet (3-200 caractères)
-     - **Description** : Description détaillée (minimum 10 caractères)
-     - **Critères de Succès** : Ce qui sera évalué (optionnel)
-     - **Tags** : Mots-clés pour la recherche (maximum 10)
-     - **Type** : Individuel ou Équipe
-     - **Date de Début** : Quand le projet commence
-     - **Date de Fin** : Date limite d'inscription
-     - **Points** :
-       - 1ère place (défaut: 100)
-       - 2ème place (défaut: 75)
-       - 3ème place (défaut: 50)
-       - Autres participants (défaut: 25)
-   - Cliquez sur "Créer"
-   - Le projet est créé avec le statut "Draft" (brouillon)
+1. **Access Profile**
 
-2. **Modifier un Projet**
+   - Click on your name in the navigation bar
+   - Or go directly to `/profile`
 
-   - Dans "Admin" → "Projets"
-   - Cliquez sur le projet à modifier
-   - Cliquez sur "Modifier"
-   - Modifiez les champs souhaités
-   - Cliquez sur "Sauvegarder"
+2. **Edit Profile**
 
-3. **Changer le Statut d'un Projet**
+   - Click the "Edit" button in your profile
+   - You can modify:
+     - First and Last Name
+     - Username
+     - Bio (personal description)
+   - Click "Save"
 
-   - **Draft** → **Active** : Le projet devient visible et ouvert aux inscriptions
-   - **Active** → **Completed** : Le projet est terminé, plus d'inscriptions possibles
-   - **Completed** → **Archived** : Le projet est archivé dans l'historique
+3. **Generate Bio with AI**
 
-4. **Supprimer un Projet**
-   - Attention : Action irréversible
-   - Cliquez sur "Supprimer" dans les détails du projet
-   - Confirmez la suppression
+   - In the "Bio" section of your profile
+   - Click "Generate with AI"
+   - AI will create a professional bio based on your skills
+   - You can accept or modify it
 
-#### Évaluation des Soumissions
+4. **Change Password**
+   - In your profile, "Security" section
+   - Enter your current password
+   - Enter new password (minimum 8 characters)
+   - Confirm new password
+   - Click "Change password"
 
-1. **Voir les Soumissions**
+#### Team Management
 
-   - Accédez à "Admin" → "Soumissions"
-   - Vous verrez toutes les soumissions en attente d'évaluation
-   - Filtrez par projet si nécessaire
+1. **Create a Team**
 
-2. **Évaluer une Soumission**
+   - Go to the "Team" page (`/team`)
+   - Click "Create a Team"
+   - Fill out the form:
+     - Team name (2-100 characters)
+     - Slogan (optional)
+     - Description/Mission (optional)
+   - Click "Launch Team"
+   - You automatically become the team leader
 
-   - Cliquez sur une soumission
-   - Consultez le lien GitHub
-   - **Approuver** :
-     - Cliquez sur "Approuver"
-     - La soumission passe en statut "Approuvée"
-   - **Rejeter** :
-     - Cliquez sur "Rejeter"
-     - Ajoutez un feedback expliquant pourquoi
-     - La soumission est rejetée
+2. **Join a Team**
 
-3. **Attribuer un Rang (Podium)**
-   - Une fois les soumissions approuvées, vous pouvez les classer
-   - Cliquez sur "Classer" sur une soumission approuvée
-   - Attribuez un rang (1, 2, 3, etc.)
-   - Les points sont automatiquement distribués selon le système de points
+   - Option 1: Via invitation code
+     - Click "Join via code"
+     - Enter the invitation code provided by the leader
+     - Click "Verify Code & Enter"
+   - Option 2: Be added by a leader
+     - The leader must add you via your email or username
 
-#### Gestion des Utilisateurs
+3. **Invite Members**
 
-1. **Voir Tous les Utilisateurs**
+   - As a leader, go to your team
+   - Click "+ Add Recruit"
+   - Enter the member's email or username
+   - Click "Send Integration Order"
 
-   - Accédez à "Admin" → "Utilisateurs"
-   - Vous verrez la liste de tous les utilisateurs
-   - Filtrez par nom, email ou rôle
+4. **Manage Members**
 
-2. **Créer un Utilisateur**
+   - Promote a member to leader rank (maximum 2 leaders)
+   - Remove leadership from a member
+   - Remove a member from the team
 
-   - Cliquez sur "Créer un Utilisateur"
-   - Remplissez le formulaire
-   - Choisissez le rôle (User ou Admin)
-   - Cliquez sur "Créer"
+5. **Leave a Team**
+   - Go to your team
+   - In the "Leave Squad" section
+   - Click "Leave"
+   - Confirm your action
+   - Warning: If you are the only leader, you must appoint another leader before leaving
 
-3. **Modifier un Utilisateur**
+#### Project Participation
 
-   - Cliquez sur un utilisateur
-   - Modifiez les informations
-   - Cliquez sur "Sauvegarder"
+1. **Explore Projects**
 
-4. **Supprimer un Utilisateur**
+   - Go to the "Projects" page (`/projects`)
+   - Use filters for:
+     - Type: Solo or Team
+     - Status: Active or Completed
+   - Click "Explore" to see project details
 
-   - Attention : Action irréversible
-   - Cliquez sur "Supprimer" sur un utilisateur
-   - Confirmez la suppression
+2. **Register for Individual Project**
 
-5. **Ajuster les Points Manuellement**
-   - Dans "Admin" → "Utilisateurs" ou "Équipes"
-   - Cliquez sur "Ajuster les Points"
-   - Entrez le nombre de points à ajouter ou retirer
-   - Ajoutez une raison (optionnel)
-   - Cliquez sur "Appliquer"
+   - Find a "Solo" type project
+   - Click "Participate"
+   - Note: If you are in a team, only one team member can participate in an individual project
 
-#### Gestion des Équipes
+3. **Register Team for Project**
 
-1. **Voir Toutes les Équipes**
+   - Find a "Team" type project
+   - Note: Only the leader can register the team
+   - Click "Participate"
+   - Your team must have at least the minimum required number of members
 
-   - Accédez à "Admin" → "Équipes"
-   - Vous verrez toutes les équipes avec leurs statistiques
+4. **View My Projects**
+   - Click the "My Registrations" tab on the Projects page
+   - You will see all projects you are participating in (individually or as a team)
 
-2. **Voir les Membres d'une Équipe**
+#### Submit a Project
 
-   - Cliquez sur une équipe
-   - Cliquez sur "Voir les Membres"
-   - Vous verrez tous les membres de l'équipe
+1. **Prepare Your GitHub Repository**
 
-3. **Ajouter un Membre à une Équipe**
+   - Create a GitHub repository for your project
+   - Ensure the repository is public or accessible
+   - Add a README with project description
 
-   - Dans les détails d'une équipe
-   - Cliquez sur "Recruter"
-   - Entrez l'email ou le nom d'utilisateur
-   - Cliquez sur "Recruter"
+2. **Submit the Link**
 
-4. **Retirer un Membre d'une Équipe**
+   - Go to the project details page (`/projects/:id`)
+   - Scroll to the "Submission" section
+   - Enter your GitHub repository link (format: `https://github.com/username/repo`)
+   - Click "Submit"
+   - Note: You can only submit once per project
 
-   - Dans les membres d'une équipe
-   - Cliquez sur "Retirer" à côté du membre
-   - Confirmez l'action
+3. **Track Your Submission Status**
+   - In "My Registrations", you can see your submission status:
+     - Pending: Under evaluation
+     - Approved: Your submission has been accepted
+     - Rejected: Your submission has been declined (with feedback)
 
-5. **Ajuster les Points d'une Équipe**
-   - Cliquez sur "Ajuster les Points"
-   - Entrez le nombre de points
-   - Ajoutez une raison
-   - Cliquez sur "Appliquer"
+#### View Leaderboards
+
+1. **Global Leaderboard**
+
+   - Go to the "Leaderboard" page (`/leaderboard`)
+   - View top 10 users
+   - View top 10 teams
+
+2. **Project Leaderboard**
+   - On a completed project details page
+   - View the podium (1st, 2nd, 3rd place)
+   - See all ranked participants
+
+#### Use AI Features
+
+1. **Generate Bio**
+
+   - In your profile, "Bio" section
+   - Click "Generate with AI"
+   - AI will create a bio based on your skills
+
+2. **Get Project Recommendations**
+
+   - Go to "AI Assistant" page (`/chat-assistant`)
+   - Click "Project Recommendations"
+   - AI will suggest projects suited to your profile
+
+3. **Chat with Assistant**
+
+   - Go to "AI Assistant"
+   - Ask questions about the platform
+   - AI will help you navigate and understand the rules
+
+4. **Generate Project Idea**
+   - Go to "Generate Idea" (`/generate-idea`)
+   - Choose a theme (Web, Mobile, AI, etc.)
+   - Choose difficulty (Easy, Medium, Hard)
+   - Click "Generate"
+   - AI will create an innovative project idea
 
 ---
 
-### Pour les Visiteurs (Non Connectés)
+### For Administrators
 
-#### 🔍 Navigation Publique
+#### Administrator Access
 
-1. **Explorer les Projets**
+1. **First User = Admin**
 
-   - Accédez à la page "Projets" (`/projects`)
-   - Vous pouvez voir tous les projets publics
-   - Consultez les détails de chaque projet
-   - Attention : Vous ne pouvez pas vous inscrire sans compte
+   - The first user to register automatically becomes administrator
+   - Subsequent users are normal users
 
-2. **Consulter les Classements**
+2. **Log In as Admin**
+   - Log in normally with your admin account
+   - You will see an "Admin" tab in the navigation
 
-   - Accédez à la page "Classement" (`/leaderboard`)
-   - Consultez le top 10 des utilisateurs
-   - Consultez le top 10 des équipes
-   - Consultez les classements des projets terminés
+#### Project Management
 
-3. **Voir les Équipes**
+1. **Create a Project**
 
-   - Accédez à la page "Équipes" (si accessible)
-   - Consultez les équipes publiques et leurs statistiques
+   - Go to "Admin" → "Projects"
+   - Click "Create a Project"
+   - Fill out the form:
+     - **Title**: Project name (3-200 characters)
+     - **Description**: Detailed description (minimum 10 characters)
+     - **Success Criteria**: What will be evaluated (optional)
+     - **Tags**: Keywords for search (maximum 10)
+     - **Type**: Individual or Team
+     - **Start Date**: When the project begins
+     - **End Date**: Registration deadline
+     - **Points**:
+       - 1st place (default: 100)
+       - 2nd place (default: 75)
+       - 3rd place (default: 50)
+       - Other participants (default: 25)
+   - Click "Create"
+   - Project is created with "Draft" status
 
-4. **Voir les Détails d'un Projet**
-   - Cliquez sur "Explorer" sur n'importe quel projet
-   - Consultez :
-     - La description complète
-     - Les critères de succès
-     - Les tags
-     - Les dates importantes
-     - Le nombre de participants
-   - Attention : Vous ne pouvez pas vous inscrire sans compte
+2. **Edit a Project**
 
-#### 🔐 Créer un Compte
+   - In "Admin" → "Projects"
+   - Click on the project to edit
+   - Click "Edit"
+   - Modify desired fields
+   - Click "Save"
 
-1. **S'inscrire**
+3. **Change Project Status**
 
-   - Cliquez sur "S'inscrire" dans la navigation
-   - Remplissez le formulaire d'inscription
-   - Créez votre compte
-   - Vous serez automatiquement connecté
+   - **Draft** → **Active**: Project becomes visible and open for registration
+   - **Active** → **Completed**: Project is finished, no more registrations
+   - **Completed** → **Archived**: Project is archived in history
 
-2. **Se Connecter**
-   - Si vous avez déjà un compte
-   - Cliquez sur "Se connecter"
-   - Entrez vos identifiants
-   - Accédez à toutes les fonctionnalités
+4. **Delete a Project**
+   - Warning: Irreversible action
+   - Click "Delete" in project details
+   - Confirm deletion
+
+#### Submission Evaluation
+
+1. **View Submissions**
+
+   - Go to "Admin" → "Submissions"
+   - You will see all submissions pending evaluation
+   - Filter by project if needed
+
+2. **Evaluate a Submission**
+
+   - Click on a submission
+   - Review the GitHub link
+   - **Approve**:
+     - Click "Approve"
+     - Submission status changes to "Approved"
+   - **Reject**:
+     - Click "Reject"
+     - Add feedback explaining why
+     - Submission is rejected
+
+3. **Assign Rank (Podium)**
+   - Once submissions are approved, you can rank them
+   - Click "Rank" on an approved submission
+   - Assign a rank (1, 2, 3, etc.)
+   - Points are automatically distributed according to the points system
+
+#### User Management
+
+1. **View All Users**
+
+   - Go to "Admin" → "Users"
+   - You will see the list of all users
+   - Filter by name, email or role
+
+2. **Create a User**
+
+   - Click "Create a User"
+   - Fill out the form
+   - Choose role (User or Admin)
+   - Click "Create"
+
+3. **Edit a User**
+
+   - Click on a user
+   - Modify information
+   - Click "Save"
+
+4. **Delete a User**
+
+   - Warning: Irreversible action
+   - Click "Delete" on a user
+   - Confirm deletion
+
+5. **Manually Adjust Points**
+   - In "Admin" → "Users" or "Teams"
+   - Click "Adjust Points"
+   - Enter the number of points to add or remove
+   - Add a reason (optional)
+   - Click "Apply"
+
+#### Team Management
+
+1. **View All Teams**
+
+   - Go to "Admin" → "Teams"
+   - You will see all teams with their statistics
+
+2. **View Team Members**
+
+   - Click on a team
+   - Click "View Members"
+   - You will see all team members
+
+3. **Add Member to Team**
+
+   - In team details
+   - Click "Recruit"
+   - Enter email or username
+   - Click "Recruit"
+
+4. **Remove Member from Team**
+
+   - In team members
+   - Click "Remove" next to the member
+   - Confirm action
+
+5. **Adjust Team Points**
+   - Click "Adjust Points"
+   - Enter number of points
+   - Add a reason
+   - Click "Apply"
+
+---
+
+### For Visitors (Not Logged In)
+
+#### 🔍 Public Navigation
+
+1. **Explore Projects**
+
+   - Go to the "Projects" page (`/projects`)
+   - You can see all public projects
+   - View details of each project
+   - Note: You cannot register without an account
+
+2. **View Leaderboards**
+
+   - Go to the "Leaderboard" page (`/leaderboard`)
+   - View top 10 users
+   - View top 10 teams
+   - View completed project leaderboards
+
+3. **View Teams**
+
+   - Go to the "Teams" page (if accessible)
+   - View public teams and their statistics
+
+4. **View Project Details**
+   - Click "Explore" on any project
+   - View:
+     - Full description
+     - Success criteria
+     - Tags
+     - Important dates
+     - Number of participants
+   - Note: You cannot register without an account
+
+#### 🔐 Create an Account
+
+1. **Sign Up**
+
+   - Click "Sign Up" in the navigation
+   - Fill out the registration form
+   - Create your account
+   - You will be automatically logged in
+
+2. **Log In**
+   - If you already have an account
+   - Click "Log In"
+   - Enter your credentials
+   - Access all features
 
 ---
 
 ## Installation
 
-### Prérequis
+### Prerequisites
 
-- **Node.js** (version 18 ou supérieure)
-- **MongoDB** (local ou MongoDB Atlas)
-- **Clé API Google Gemini** ([Obtenir une clé](https://ai.google.dev/))
+- **Node.js** (version 18 or higher)
+- **MongoDB** (local or MongoDB Atlas)
+- **Google Gemini API Key** ([Get a key](https://ai.google.dev/))
 
 ### Configuration
 
-1. **Cloner le Dépôt**
+1. **Clone the Repository**
 
    ```bash
-   git clone <url-du-depot>
+   git clone <repository-url>
    cd projet-mern
    ```
 
-2. **Configurer le Backend**
+2. **Configure Backend**
 
    ```bash
    cd Backend
    npm install
    ```
 
-   Créez un fichier `.env` dans le dossier `Backend/` :
+   Create a `.env` file in the `Backend/` folder:
 
    ```env
    PORT=5000
    MONGO_URI=mongodb://localhost:27017/student-arena
-   # Ou pour MongoDB Atlas :
+   # Or for MongoDB Atlas:
    # MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/student-arena
-   JWT_SECRET=votre_secret_jwt_tres_securise
-   GEMINI_API_KEY=votre_cle_api_google_gemini
+   JWT_SECRET=your_very_secure_jwt_secret
+   GEMINI_API_KEY=your_google_gemini_api_key
    ```
 
-3. **Configurer le Frontend**
+3. **Configure Frontend**
    ```bash
    cd Frontend/student-arena
    npm install
    ```
 
-### Lancement
+### Launch
 
-**Backend :**
+**Backend:**
 
 ```bash
 cd Backend
 npm run dev
 ```
 
-Le serveur backend sera accessible sur `http://localhost:5000`
+The backend server will be accessible at `http://localhost:5000`
 
-**Frontend :**
+**Frontend:**
 
 ```bash
 cd Frontend/student-arena
 npm run dev
 ```
 
-L'application sera accessible sur `http://localhost:5173`
+The application will be accessible at `http://localhost:5173`
 
 ---
 
-## Architecture Technique
+## Technical Architecture
 
 ### Frontend
 
-- **React 19** : Bibliothèque UI moderne
-- **Vite** : Build tool ultra-rapide
-- **React Router 7** : Navigation avec routes protégées
-- **Axios** : Client HTTP avec intercepteurs JWT
-- **Vanilla CSS** : Styles premium avec glassmorphism
+- **React 19**: Modern UI library
+- **Vite**: Ultra-fast build tool
+- **React Router 7**: Navigation with protected routes
+- **Axios**: HTTP client with JWT interceptors
+- **Vanilla CSS**: Premium styles with glassmorphism
 
 ### Backend
 
-- **Node.js & Express** : Serveur API REST
-- **MongoDB & Mongoose** : Base de données NoSQL
-- **JWT** : Authentification sécurisée
-- **Bcrypt.js** : Hashage des mots de passe
-- **Google Generative AI** : Intégration IA
-- **Express Validator** : Validation des données
-- **Helmet** : Sécurité HTTP
-- **CORS** : Gestion des origines croisées
+- **Node.js & Express**: REST API server
+- **MongoDB & Mongoose**: NoSQL database
+- **JWT**: Secure authentication
+- **Bcrypt.js**: Password hashing
+- **Google Generative AI**: AI integration
+- **Express Validator**: Data validation
+- **Helmet**: HTTP security
+- **CORS**: Cross-origin management
 
 ---
 
-## Système de Points
+## Points System
 
-### Distribution des Points
+### Points Distribution
 
-Lorsqu'un administrateur classe une soumission approuvée, les points sont distribués selon une logique de bonus :
+When an administrator ranks an approved submission, points are distributed according to a bonus logic:
 
-#### Projet Individuel
+#### Individual Project
 
-- L'étudiant reçoit **100%** des points du rang (ex: 100 pts pour la 1ère place)
-- Si l'étudiant appartient à une équipe, son **équipe reçoit un bonus de 50%** (50 pts) automatiquement
+- The student receives **100%** of the rank points (e.g., 100 pts for 1st place)
+- If the student belongs to a team, their **team receives a 50% bonus** (50 pts) automatically
 
-#### Projet en Équipe
+#### Team Project
 
-- L'équipe reçoit **100%** des points du rang
-- **Chaque membre** de l'équipe reçoit un **bonus individuel de 50%** des points
+- The team receives **100%** of the rank points
+- **Each member** of the team receives an **individual bonus of 50%** of the points
 
-### Exemple
+### Example
 
-- Projet individuel, 1ère place (100 pts) :
-  - Étudiant : 100 pts
-  - Équipe (si membre) : 50 pts
-- Projet équipe, 1ère place (100 pts) :
-  - Équipe : 100 pts
-  - Chaque membre : 50 pts
+- Individual project, 1st place (100 pts):
+  - Student: 100 pts
+  - Team (if member): 50 pts
+- Team project, 1st place (100 pts):
+  - Team: 100 pts
+  - Each member: 50 pts
 
 ---
 
-## Modèle de Données
+## Data Model
 
 ```mermaid
 classDiagram
@@ -620,96 +620,96 @@ classDiagram
         +ObjectId reviewedBy
     }
 
-    User "0..1" -- "0..1" Team : appartient à
-    User "1" -- "0..*" Project : crée (si admin)
-    User "0..*" -- "0..*" Project : participe (solo)
-    Team "0..*" -- "0..*" Project : participe (équipe)
-    User "1" -- "0..*" Submission : soumet (solo)
-    Team "1" -- "0..*" Submission : soumet (équipe)
-    Project "1" -- "0..*" Submission : contient
-    User "1" -- "0..*" Submission : évalue (si admin)
+    User "0..1" -- "0..1" Team : belongs to
+    User "1" -- "0..*" Project : creates (if admin)
+    User "0..*" -- "0..*" Project : participates (solo)
+    Team "0..*" -- "0..*" Project : participates (team)
+    User "1" -- "0..*" Submission : submits (solo)
+    Team "1" -- "0..*" Submission : submits (team)
+    Project "1" -- "0..*" Submission : contains
+    User "1" -- "0..*" Submission : evaluates (if admin)
 ```
 
 ---
 
-## Documentation API
+## API Documentation
 
-Toutes les routes API sont préfixées par `/api`. Les routes marquées avec [AUTH] nécessitent un token JWT. Les routes marquées avec [ADMIN] nécessitent des privilèges Admin.
+All API routes are prefixed with `/api`. Routes marked with [AUTH] require a JWT token. Routes marked with [ADMIN] require Admin privileges.
 
-### Authentification (`/api/auth`)
+### Authentication (`/api/auth`)
 
-| Méthode | Route       | Rôle   | Description                                   |
-| :------ | :---------- | :----- | :-------------------------------------------- |
-| `POST`  | `/register` | Public | Inscription d'un nouvel utilisateur           |
-| `POST`  | `/login`    | Public | Connexion et réception du token               |
-| `GET`   | `/me`       | [AUTH] | Récupérer les infos de l'utilisateur connecté |
+| Method | Route       | Role   | Description                     |
+| :----- | :---------- | :----- | :------------------------------ |
+| `POST` | `/register` | Public | Register a new user             |
+| `POST` | `/login`    | Public | Login and receive token         |
+| `GET`  | `/me`       | [AUTH] | Get logged-in user information  |
 
-### Utilisateurs (`/api/users`)
+### Users (`/api/users`)
 
-| Méthode  | Route           | Rôle    | Description                        |
-| :------- | :-------------- | :------ | :--------------------------------- |
-| `GET`    | `/profile`      | [AUTH]  | Profil complet de l'utilisateur    |
-| `GET`    | `/leaderboard`  | Public  | Top 10 des utilisateurs            |
-| `GET`    | `/`             | [ADMIN] | Liste de tous les utilisateurs     |
-| `POST`   | `/`             | [ADMIN] | Création manuelle d'un utilisateur |
-| `PUT`    | `/:id`          | [AUTH]  | Mise à jour du profil              |
-| `PUT`    | `/:id/password` | [AUTH]  | Changement de mot de passe         |
-| `DELETE` | `/:id`          | [ADMIN] | Suppression d'un compte            |
+| Method   | Route           | Role    | Description                  |
+| :------- | :-------------- | :------ | :--------------------------- |
+| `GET`    | `/profile`      | [AUTH]  | Full user profile            |
+| `GET`    | `/leaderboard`  | Public  | Top 10 users                 |
+| `GET`    | `/`             | [ADMIN] | List of all users            |
+| `POST`   | `/`             | [ADMIN] | Manually create a user       |
+| `PUT`    | `/:id`          | [AUTH]  | Update profile               |
+| `PUT`    | `/:id/password` | [AUTH]  | Change password              |
+| `DELETE` | `/:id`          | [ADMIN] | Delete account               |
 
-### Équipes (`/api/teams`)
+### Teams (`/api/teams`)
 
-| Méthode  | Route               | Rôle           | Description                    |
-| :------- | :------------------ | :------------- | :----------------------------- |
-| `POST`   | `/`                 | [AUTH]         | Créer une nouvelle équipe      |
-| `GET`    | `/`                 | Public         | Lister toutes les équipes      |
-| `GET`    | `/:id`              | Public         | Détails d'une équipe           |
-| `POST`   | `/join`             | [AUTH]         | Rejoindre via `invitationCode` |
-| `POST`   | `/:id/leave`        | [AUTH]         | Quitter l'équipe actuelle      |
-| `POST`   | `/:id/add-member`   | [ADMIN]/Leader | Ajouter un membre              |
-| `DELETE` | `/:id/members/:mId` | [ADMIN]/Leader | Expulser un membre             |
+| Method   | Route               | Role           | Description                |
+| :------- | :------------------ | :------------- | :------------------------- |
+| `POST`   | `/`                 | [AUTH]         | Create a new team          |
+| `GET`    | `/`                 | Public         | List all teams             |
+| `GET`    | `/:id`              | Public         | Team details               |
+| `POST`   | `/join`             | [AUTH]         | Join via `invitationCode`  |
+| `POST`   | `/:id/leave`        | [AUTH]         | Leave current team         |
+| `POST`   | `/:id/add-member`   | [ADMIN]/Leader | Add a member               |
+| `DELETE` | `/:id/members/:mId` | [ADMIN]/Leader | Remove a member            |
 
-### Projets (`/api/projects`)
+### Projects (`/api/projects`)
 
-| Méthode | Route            | Rôle    | Description                     |
-| :------ | :--------------- | :------ | :------------------------------ |
-| `GET`   | `/`              | Public  | Liste de tous les projets       |
-| `GET`   | `/active`        | Public  | Projets ouverts aux soumissions |
-| `GET`   | `/my-projects`   | [AUTH]  | Projets auxquels je participe   |
-| `GET`   | `/team-projects` | [AUTH]  | Projets de mon équipe           |
-| `POST`  | `/`              | [ADMIN] | Créer un nouveau projet         |
-| `POST`  | `/:id/register`  | [AUTH]  | S'inscrire à un projet          |
-| `PUT`   | `/:id/status`    | [ADMIN] | Changer le statut               |
+| Method | Route            | Role    | Description                    |
+| :----- | :--------------- | :------ | :----------------------------- |
+| `GET`  | `/`              | Public  | List of all projects           |
+| `GET`  | `/active`        | Public  | Projects open for submissions  |
+| `GET`  | `/my-projects`   | [AUTH]  | Projects I'm participating in  |
+| `GET`  | `/team-projects` | [AUTH]  | My team's projects             |
+| `POST` | `/`              | [ADMIN] | Create a new project           |
+| `POST` | `/:id/register`  | [AUTH]  | Register for a project         |
+| `PUT`  | `/:id/status`    | [ADMIN] | Change status                  |
 
-### Soumissions (`/api/submissions`)
+### Submissions (`/api/submissions`)
 
-| Méthode | Route             | Rôle    | Description                  |
-| :------ | :---------------- | :------ | :--------------------------- |
-| `POST`  | `/`               | [AUTH]  | Soumettre un lien GitHub     |
-| `GET`   | `/my-submissions` | [AUTH]  | Voir mes propres soumissions |
-| `GET`   | `/`               | [ADMIN] | Voir toutes les soumissions  |
-| `PUT`   | `/:id/review`     | [ADMIN] | Noter et donner un feedback  |
-| `PUT`   | `/:id/rank`       | [ADMIN] | Assigner un podium           |
+| Method | Route             | Role    | Description                  |
+| :----- | :---------------- | :------ | :--------------------------- |
+| `POST` | `/`               | [AUTH]  | Submit a GitHub link         |
+| `GET`  | `/my-submissions` | [AUTH]  | View my own submissions      |
+| `GET`  | `/`               | [ADMIN] | View all submissions         |
+| `PUT`  | `/:id/review`     | [ADMIN] | Grade and give feedback      |
+| `PUT`  | `/:id/rank`       | [ADMIN] | Assign a podium rank         |
 
-### Intelligence Artificielle (`/api/ai`)
+### Artificial Intelligence (`/api/ai`)
 
-| Méthode | Route                    | Rôle   | Description                   |
-| :------ | :----------------------- | :----- | :---------------------------- |
-| `POST`  | `/generate-bio`          | [AUTH] | Générer une bio via Gemini    |
-| `GET`   | `/recommend-projects`    | [AUTH] | Projets suggérés via IA       |
-| `POST`  | `/chat`                  | [AUTH] | Interagir avec l'assistant IA |
-| `POST`  | `/generate-project-idea` | [AUTH] | Générer une idée de projet    |
+| Method | Route                    | Role   | Description                |
+| :----- | :----------------------- | :----- | :------------------------- |
+| `POST` | `/generate-bio`          | [AUTH] | Generate bio via Gemini    |
+| `GET`  | `/recommend-projects`    | [AUTH] | AI-suggested projects      |
+| `POST` | `/chat`                  | [AUTH] | Interact with AI assistant |
+| `POST` | `/generate-project-idea` | [AUTH] | Generate project idea      |
 
 ---
 
-## Structure du Projet
+## Project Structure
 
 ```
 projet-mern/
-├── Backend/                    # API REST Node.js
-│   ├── config/                 # Configuration DB & AI
-│   │   ├── db.js              # Connexion MongoDB
-│   │   └── gemini.js          # Configuration Google Gemini
-│   ├── controllers/           # Logique métier
+├── Backend/                    # Node.js REST API
+│   ├── config/                 # DB & AI Configuration
+│   │   ├── db.js              # MongoDB Connection
+│   │   └── gemini.js          # Google Gemini Configuration
+│   ├── controllers/           # Business Logic
 │   │   ├── authController.js
 │   │   ├── userController.js
 │   │   ├── teamController.js
@@ -718,15 +718,15 @@ projet-mern/
 │   │   ├── leaderboardController.js
 │   │   └── aiController.js
 │   ├── middleware/            # Middlewares
-│   │   ├── authMiddleware.js  # Protection JWT
+│   │   ├── authMiddleware.js  # JWT Protection
 │   │   └── validationMiddleware.js
-│   ├── models/                # Schémas Mongoose
+│   ├── models/                # Mongoose Schemas
 │   │   ├── User.js
 │   │   ├── Team.js
 │   │   ├── Project.js
 │   │   ├── Submission.js
 │   │   └── Leaderboard.js
-│   ├── routes/                # Routes API
+│   ├── routes/                # API Routes
 │   │   ├── authRoutes.js
 │   │   ├── userRoutes.js
 │   │   ├── teamRoutes.js
@@ -734,15 +734,15 @@ projet-mern/
 │   │   ├── submissionRoutes.js
 │   │   ├── leaderboardRoutes.js
 │   │   └── aiRoutes.js
-│   ├── seeder.js              # Script de seed (optionnel)
-│   ├── server.js              # Point d'entrée
+│   ├── seeder.js              # Seed Script (optional)
+│   ├── server.js              # Entry Point
 │   └── package.json
 │
 ├── Frontend/
-│   └── student-arena/         # Application React
+│   └── student-arena/         # React Application
 │       ├── src/
 │       │   ├── api/
-│       │   │   └── axiosConfig.js  # Configuration Axios
+│       │   │   └── axiosConfig.js  # Axios Configuration
 │       │   ├── components/
 │       │   │   ├── Navbar.jsx
 │       │   │   └── PrivateRoute.jsx
@@ -774,43 +774,38 @@ projet-mern/
 │       └── package.json
 │
 ├── img/
-│   └── logo.jpg               # Logo du projet
+│   └── logo.jpg               # Project Logo
 │
-└── README.md                  # Ce fichier
+└── README.md                  # This File
 ```
 
 ---
 
-## Sécurité
+## Security
 
-- **JWT** : Authentification stateless sécurisée
-- **Bcrypt** : Hashage des mots de passe (10 rounds)
-- **Helmet** : Protection contre les vulnérabilités HTTP
-- **CORS** : Configuration stricte des origines autorisées
-- **Validation** : Validation stricte des données entrantes
+- **JWT**: Secure stateless authentication
+- **Bcrypt**: Password hashing (10 rounds)
+- **Helmet**: Protection against HTTP vulnerabilities
+- **CORS**: Strict configuration of allowed origins
+- **Validation**: Strict validation of incoming data
+
 ---
 
 ## Design
 
-- **Glassmorphism** : Effets de flou d'arrière-plan
-- **Gradients Dynamiques** : Couleurs vibrantes et modernes
-- **Micro-animations** : Transitions fluides
-- **Responsive** : Adapté à tous les écrans
-- **Dark Elements** : Réduction de la fatigue visuelle
+- **Glassmorphism**: Backdrop blur effects
+- **Dynamic Gradients**: Vibrant and modern colors
+- **Micro-animations**: Smooth transitions
+- **Responsive**: Adapted to all screens
+- **Dark Elements**: Reduced visual fatigue
 
 ---
 
-## Notes Importantes
+## Important Notes
 
-- Le premier utilisateur inscrit devient automatiquement administrateur
-- Les projets en statut "Draft" ne sont pas visibles par les utilisateurs
-- Un utilisateur ne peut appartenir qu'à une seule équipe à la fois
-- Une équipe doit avoir au moins 1 leader et maximum 2 leaders
-- Les soumissions ne peuvent être modifiées qu'avant l'évaluation
-- Les points sont distribués automatiquement lors du classement
-
----
-
-## Licence
-
-Ce projet est sous licence ISC.
+- The first registered user automatically becomes administrator
+- Projects in "Draft" status are not visible to users
+- A user can only belong to one team at a time
+- A team must have at least 1 leader and maximum 2 leaders
+- Submissions can only be modified before evaluation
+- Points are automatically distributed during ranking
